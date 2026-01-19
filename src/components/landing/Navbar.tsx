@@ -32,10 +32,10 @@ const Navbar = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" asChild>
-              <Link to="/auth">Se connecter</Link>
+              <Link to="/auth?mode=login">Se connecter</Link>
             </Button>
             <Button asChild>
-              <Link to="/auth">
+              <Link to="/auth?mode=signup">
                 <LogIn className="w-4 h-4" />
                 Inscription
               </Link>
@@ -65,10 +65,10 @@ const Navbar = () => {
               <a href="#" className="text-muted-foreground py-2">Contact</a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button variant="outline" className="w-full" asChild>
-                  <Link to="/auth">Se connecter</Link>
+                  <Link to="/auth?mode=login">Se connecter</Link>
                 </Button>
                 <Button className="w-full" asChild>
-                  <Link to="/auth">
+                  <Link to="/auth?mode=signup">
                     <LogIn className="w-4 h-4" />
                     Inscription
                   </Link>

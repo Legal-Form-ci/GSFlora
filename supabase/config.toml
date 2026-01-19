@@ -1,1 +1,5 @@
 project_id = "vwqqhmeirwczghrorjmm"
+
+[functions.ai-course-generator]
+enabled = true
+verify_jwt = false

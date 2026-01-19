@@ -31,9 +31,12 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { signIn, signUp, resetPassword, user } = useAuth();
   
-  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(
-    searchParams.get('mode') === 'reset' ? 'forgot' : 'login'
-  );
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'signup') return 'signup';
+    if (modeParam === 'reset' || modeParam === 'forgot') return 'forgot';
+    return 'login';
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
