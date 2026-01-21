@@ -2,19 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  GraduationCap,
-  Home,
-  BookOpen,
-  FileText,
-  ClipboardList,
-  BarChart3,
-  Calendar,
-  Users,
   Bell,
   Settings,
   LogOut,
   Menu,
-  X,
   ChevronDown,
   UserCircle,
 } from 'lucide-react';
@@ -28,7 +19,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import logoFlora from '@/assets/logo-flora.jpeg';
 
 interface NavItem {
   label: string;
@@ -87,9 +77,9 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
           <div className="p-4 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-3">
               <img
-                src={logoFlora}
+                src="/logo-flora.png"
                 alt="GS Flora"
-                className="w-10 h-10 rounded-lg object-cover"
+                className="w-10 h-10 object-contain"
               />
               <div>
                 <h1 className="font-display text-lg font-bold text-sidebar-foreground">
