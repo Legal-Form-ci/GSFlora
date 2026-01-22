@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import RichTextEditor from '@/components/editor/RichTextEditor';
-import { generateCoursePDF } from '@/utils/pdfGenerator';
+import { downloadPDF } from '@/utils/pdfGenerator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -176,20 +176,19 @@ const CourseEditor = () => {
     }
   };
 
-  const handleGeneratePDF = () => {
+  const handleGeneratePDF = async () => {
     const selectedClass = classes.find(c => c.id === classId);
     const selectedSubject = subjects.find(s => s.id === subjectId);
     
-    generateCoursePDF({
+    await downloadPDF({
       title,
       content,
-      chapter,
+      type: 'course',
       className: selectedClass?.name || '',
-      subjectName: selectedSubject?.name || '',
+      level: selectedClass?.level || '',
+      subject: selectedSubject?.name || '',
       teacherName: profile ? `${profile.first_name} ${profile.last_name}` : '',
       schoolName: 'Groupe Scolaire Flora',
-      schoolCode: '190063',
-      date: new Date().toLocaleDateString('fr-FR'),
     });
     
     toast.success('PDF généré avec succès');
@@ -336,7 +335,7 @@ const CourseEditor = () => {
       <AIPreparationModal
         isOpen={showAIModal}
         onClose={() => setShowAIModal(false)}
-        onUseContent={(aiContent) => setContent(aiContent)}
+        onUseContent={(aiContent: string) => setContent(aiContent)}
         subjects={subjects}
         classes={classes}
         teacherName={teacherName}
