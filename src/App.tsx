@@ -16,6 +16,10 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import TeacherDashboard from "./pages/dashboard/TeacherDashboard";
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import ParentDashboard from "./pages/dashboard/ParentDashboard";
+import EducatorDashboard from "./pages/dashboard/EducatorDashboard";
+import CensorDashboard from "./pages/dashboard/CensorDashboard";
+import FounderDashboard from "./pages/dashboard/FounderDashboard";
+import PrincipalTeacherDashboard from "./pages/dashboard/PrincipalTeacherDashboard";
 
 // Admin pages
 import UsersManagement from "./pages/admin/UsersManagement";
@@ -23,6 +27,7 @@ import ClassesManagement from "./pages/admin/ClassesManagement";
 import SubjectsManagement from "./pages/admin/SubjectsManagement";
 import AnnouncementsManagement from "./pages/admin/AnnouncementsManagement";
 import SchedulesManagement from "./pages/admin/SchedulesManagement";
+import StatisticsDashboard from "./pages/admin/StatisticsDashboard";
 
 // Teacher pages
 import CoursesList from "./pages/teacher/CoursesList";
@@ -35,15 +40,16 @@ import GradesEntry from "./pages/teacher/GradesEntry";
 import QuizList from "./pages/student/QuizList";
 import QuizTaking from "./pages/student/QuizTaking";
 
+// Shared pages
+import MessagesPage from "./pages/messages/MessagesPage";
+
 const queryClient = new QueryClient();
 
 // Component to handle role-based redirect after login
 const DashboardRedirect = () => {
   const { role, loading } = useAuth();
   
-  if (loading) {
-    return null;
-  }
+  if (loading) return null;
   
   switch (role) {
     case 'super_admin':
@@ -55,6 +61,14 @@ const DashboardRedirect = () => {
       return <Navigate to="/student" replace />;
     case 'parent':
       return <Navigate to="/parent" replace />;
+    case 'educator':
+      return <Navigate to="/educator" replace />;
+    case 'censor':
+      return <Navigate to="/censor" replace />;
+    case 'founder':
+      return <Navigate to="/founder" replace />;
+    case 'principal_teacher':
+      return <Navigate to="/principal-teacher" replace />;
     default:
       return <Index />;
   }
