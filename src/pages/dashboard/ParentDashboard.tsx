@@ -249,32 +249,31 @@ const ParentDashboard = () => {
             <div className="grid md:grid-cols-4 gap-4">
               <StatCard
                 title="Moyenne générale"
-                value={calculateAverageGrade()}
-                subtitle="/20"
+                value={`${calculateAverageGrade()}/20`}
                 icon={<GraduationCap className="w-5 h-5" />}
                 trend={Number(calculateAverageGrade()) >= 10 ? 
-                  { value: 'Satisfaisant', isPositive: true } : 
-                  { value: 'À améliorer', isPositive: false }}
+                  { value: 5, isPositive: true } : 
+                  { value: -5, isPositive: false }}
               />
               <StatCard
                 title="Présences"
-                value={attendanceStats.present}
-                subtitle="jours"
+                value={`${attendanceStats.present} jours`}
                 icon={<CheckCircle2 className="w-5 h-5" />}
+                iconClassName="bg-flora-success/20 text-flora-success"
               />
               <StatCard
                 title="Absences"
-                value={attendanceStats.absent}
-                subtitle="jours"
+                value={`${attendanceStats.absent} jours`}
                 icon={<XCircle className="w-5 h-5" />}
+                iconClassName="bg-destructive/20 text-destructive"
                 trend={attendanceStats.absent > 5 ? 
-                  { value: 'Attention', isPositive: false } : undefined}
+                  { value: attendanceStats.absent, isPositive: false } : undefined}
               />
               <StatCard
                 title="Retards"
-                value={attendanceStats.late}
-                subtitle="fois"
+                value={`${attendanceStats.late} fois`}
                 icon={<Clock className="w-5 h-5" />}
+                iconClassName="bg-amber-500/20 text-amber-600"
               />
             </div>
 

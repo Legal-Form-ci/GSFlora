@@ -5,12 +5,35 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// Pages
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
+// Dashboards
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import TeacherDashboard from "./pages/dashboard/TeacherDashboard";
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
+import ParentDashboard from "./pages/dashboard/ParentDashboard";
+
+// Admin pages
+import UsersManagement from "./pages/admin/UsersManagement";
+import ClassesManagement from "./pages/admin/ClassesManagement";
+import SubjectsManagement from "./pages/admin/SubjectsManagement";
+import AnnouncementsManagement from "./pages/admin/AnnouncementsManagement";
+import SchedulesManagement from "./pages/admin/SchedulesManagement";
+
+// Teacher pages
+import CoursesList from "./pages/teacher/CoursesList";
+import CourseEditor from "./pages/teacher/CourseEditor";
+import AssignmentsList from "./pages/teacher/AssignmentsList";
+import QuizManager from "./pages/teacher/QuizManager";
+import GradesEntry from "./pages/teacher/GradesEntry";
+
+// Student pages
+import QuizList from "./pages/student/QuizList";
+import QuizTaking from "./pages/student/QuizTaking";
 
 const queryClient = new QueryClient();
 
@@ -56,10 +79,66 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/admin/*"
+        path="/admin/users"
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
-            <AdminDashboard />
+            <UsersManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users/new"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <UsersManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/classes"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <ClassesManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/classes/new"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <ClassesManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/subjects"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <SubjectsManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/schedules"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <SchedulesManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/announcements"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <AnnouncementsManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/announcements/new"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <AnnouncementsManagement />
           </ProtectedRoute>
         }
       />
@@ -74,10 +153,50 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/teacher/*"
+        path="/teacher/courses"
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}>
-            <TeacherDashboard />
+            <CoursesList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/courses/new"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}>
+            <CourseEditor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/courses/:id/edit"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}>
+            <CourseEditor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/assignments"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}>
+            <AssignmentsList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/quizzes"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}>
+            <QuizManager />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/grades"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}>
+            <GradesEntry />
           </ProtectedRoute>
         }
       />
@@ -92,10 +211,36 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/student/*"
+        path="/student/quizzes"
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin', 'student']}>
-            <StudentDashboard />
+            <QuizList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/quiz/:quizId"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'student']}>
+            <QuizTaking />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* Parent routes */}
+      <Route
+        path="/parent"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'parent']}>
+            <ParentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/parent/*"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'parent']}>
+            <ParentDashboard />
           </ProtectedRoute>
         }
       />

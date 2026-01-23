@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import RichTextEditor from '@/components/editor/RichTextEditor';
 import { downloadPDF } from '@/utils/pdfGenerator';
+import { downloadWord } from '@/utils/wordGenerator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Home,
   BookOpen,
@@ -30,6 +37,7 @@ import {
   ArrowLeft,
   Sparkles,
   Loader2,
+  Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AIPreparationModal from '@/components/course/AIPreparationModal';
@@ -194,6 +202,24 @@ const CourseEditor = () => {
     toast.success('PDF généré avec succès');
   };
 
+  const handleGenerateWord = async () => {
+    const selectedClass = classes.find(c => c.id === classId);
+    const selectedSubject = subjects.find(s => s.id === subjectId);
+    
+    await downloadWord({
+      title,
+      content,
+      type: 'course',
+      className: selectedClass?.name || '',
+      level: selectedClass?.level || '',
+      subject: selectedSubject?.name || '',
+      teacherName: profile ? `${profile.first_name} ${profile.last_name}` : '',
+      schoolName: 'Groupe Scolaire Flora',
+    });
+    
+    toast.success('Document Word généré avec succès');
+  };
+
   const teacherName = profile ? `${profile.first_name} ${profile.last_name}` : '';
 
   if (loading) {
@@ -220,10 +246,24 @@ const CourseEditor = () => {
               <Sparkles className="w-4 h-4 mr-2" />
               Aide IA
             </Button>
-            <Button variant="outline" onClick={handleGeneratePDF} disabled={!content}>
-              <FileDown className="w-4 h-4 mr-2" />
-              PDF
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={!content}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Exporter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleGeneratePDF}>
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Télécharger en PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleGenerateWord}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Télécharger en Word
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

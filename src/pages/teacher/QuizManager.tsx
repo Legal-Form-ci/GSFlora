@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { downloadPDF } from '@/utils/pdfGenerator';
+import { downloadWord } from '@/utils/wordGenerator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +27,8 @@ import {
   Clock,
   CheckCircle,
   Loader2,
+  Download,
+  FileDown,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -268,6 +272,60 @@ const QuizManager = () => {
     }
   };
 
+  const handleExportQuiz = async (quiz: Quiz, format: 'pdf' | 'word') => {
+    try {
+      // Fetch quiz questions
+      const { data: questions } = await supabase
+        .from('quiz_questions')
+        .select('*')
+        .eq('quiz_id', quiz.id)
+        .order('order_index');
+
+      // Build quiz content
+      let content = `# ${quiz.title}\n\n`;
+      if (quiz.description) content += `${quiz.description}\n\n`;
+      content += `**Durée:** ${quiz.duration_minutes} minutes\n`;
+      content += `**Tentatives max:** ${quiz.max_attempts}\n\n`;
+      content += `---\n\n`;
+
+      (questions || []).forEach((q, index) => {
+        content += `## Question ${index + 1} (${q.points} pts)\n\n`;
+        content += `${q.question_text}\n\n`;
+        
+        if (q.options) {
+          const options = JSON.parse(q.options as string);
+          options.forEach((opt: string, i: number) => {
+            const letter = String.fromCharCode(65 + i); // A, B, C, D
+            content += `- ${letter}) ${opt}\n`;
+          });
+        }
+        content += '\n';
+      });
+
+      const exportOptions = {
+        title: quiz.title,
+        content,
+        type: 'quiz' as const,
+        className: quiz.courses?.classes?.name || '',
+        level: '',
+        subject: quiz.courses?.subjects?.name || '',
+        teacherName: '',
+        schoolName: 'Groupe Scolaire Flora',
+      };
+
+      if (format === 'pdf') {
+        await downloadPDF(exportOptions);
+        toast.success('Quiz exporté en PDF');
+      } else {
+        await downloadWord(exportOptions);
+        toast.success('Quiz exporté en Word');
+      }
+    } catch (error) {
+      console.error('Error exporting quiz:', error);
+      toast.error('Erreur lors de l\'export');
+    }
+  };
+
   const filteredQuizzes = quizzes.filter((quiz) =>
     quiz.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -340,6 +398,15 @@ const QuizManager = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => togglePublish(quiz.id, quiz.is_published)}>
                           {quiz.is_published ? 'Dépublier' : 'Publier'}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleExportQuiz(quiz, 'pdf')}>
+                          <FileDown className="w-4 h-4 mr-2" />
+                          Exporter PDF
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExportQuiz(quiz, 'word')}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          Exporter Word
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
