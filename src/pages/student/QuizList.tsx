@@ -140,7 +140,7 @@ const QuizList = () => {
       return { status: 'completed', label: 'Terminé', variant: 'default' as const };
     }
 
-    return { status: 'available', label: 'Disponible', variant: 'success' as const };
+    return { status: 'available', label: 'Disponible', variant: 'outline' as const };
   };
 
   const getBestScore = (quiz: Quiz) => {
@@ -183,7 +183,12 @@ const QuizList = () => {
                 <Card key={quiz.id} className="flex flex-col">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <Badge variant={status.variant}>{status.label}</Badge>
+                      <Badge 
+                        variant={status.variant}
+                        className={status.status === 'available' ? 'bg-flora-success text-white border-flora-success' : ''}
+                      >
+                        {status.label}
+                      </Badge>
                       {bestScore !== null && (
                         <Badge variant="outline">
                           Meilleur: {bestScore}/{quiz.max_score}
