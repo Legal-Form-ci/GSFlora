@@ -423,6 +423,47 @@ export type Database = {
           },
         ]
       }
+      generated_schedules: {
+        Row: {
+          config_id: string | null
+          created_at: string | null
+          id: string
+          published_at: string | null
+          published_by: string | null
+          schedule_data: Json
+          school_year: string
+          status: string | null
+        }
+        Insert: {
+          config_id?: string | null
+          created_at?: string | null
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          schedule_data: Json
+          school_year: string
+          status?: string | null
+        }
+        Update: {
+          config_id?: string | null
+          created_at?: string | null
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          schedule_data?: Json
+          school_year?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_schedules_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "schedule_generation_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grades: {
         Row: {
           assignment_id: string | null
@@ -789,6 +830,63 @@ export type Database = {
           },
         ]
       }
+      schedule_generation_config: {
+        Row: {
+          break_duration_minutes: number
+          course_duration_minutes: number
+          created_at: string | null
+          end_time_wednesday: string
+          end_time_weekdays: string
+          generated_at: string | null
+          generated_by: string | null
+          id: string
+          is_active: boolean | null
+          lunch_end: string
+          lunch_start: string
+          school_year: string
+          start_time_wednesday: string
+          start_time_weekdays: string
+          total_rooms: number
+          updated_at: string | null
+        }
+        Insert: {
+          break_duration_minutes?: number
+          course_duration_minutes?: number
+          created_at?: string | null
+          end_time_wednesday?: string
+          end_time_weekdays?: string
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          lunch_end?: string
+          lunch_start?: string
+          school_year: string
+          start_time_wednesday?: string
+          start_time_weekdays?: string
+          total_rooms?: number
+          updated_at?: string | null
+        }
+        Update: {
+          break_duration_minutes?: number
+          course_duration_minutes?: number
+          created_at?: string | null
+          end_time_wednesday?: string
+          end_time_weekdays?: string
+          generated_at?: string | null
+          generated_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          lunch_end?: string
+          lunch_start?: string
+          school_year?: string
+          start_time_wednesday?: string
+          start_time_weekdays?: string
+          total_rooms?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       schedules: {
         Row: {
           class_id: string
@@ -942,6 +1040,38 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_subjects: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          subject_id: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          subject_id: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          subject_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -959,6 +1089,42 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          language: string | null
+          must_change_password: boolean | null
+          notifications_enabled: boolean | null
+          password_changed_at: string | null
+          theme: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          language?: string | null
+          must_change_password?: boolean | null
+          notifications_enabled?: boolean | null
+          password_changed_at?: string | null
+          theme?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          language?: string | null
+          must_change_password?: boolean | null
+          notifications_enabled?: boolean | null
+          password_changed_at?: string | null
+          theme?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

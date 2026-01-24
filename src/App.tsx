@@ -41,6 +41,14 @@ import GradesEntry from "./pages/teacher/GradesEntry";
 import QuizList from "./pages/student/QuizList";
 import QuizTaking from "./pages/student/QuizTaking";
 
+// Profile pages
+import ProfilePage from "./pages/profile/ProfilePage";
+import SettingsPage from "./pages/profile/SettingsPage";
+import ChangePasswordPage from "./pages/profile/ChangePasswordPage";
+
+// Director pages
+import ScheduleGenerator from "./pages/director/ScheduleGenerator";
+
 // Shared pages
 import MessagesPage from "./pages/messages/MessagesPage";
 
@@ -388,6 +396,35 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'principal_teacher']}>
             <PrincipalTeacherDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Profile routes */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/change-password" element={<ChangePasswordPage />} />
+
+      {/* Director schedule generator */}
+      <Route
+        path="/director/schedule-generator"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <ScheduleGenerator />
           </ProtectedRoute>
         }
       />
