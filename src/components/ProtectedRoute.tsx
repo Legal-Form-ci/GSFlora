@@ -2,9 +2,11 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
+type AppRole = 'super_admin' | 'admin' | 'teacher' | 'student' | 'parent' | 'educator' | 'censor' | 'founder' | 'principal_teacher' | 'director';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: ('super_admin' | 'admin' | 'teacher' | 'student' | 'parent')[];
+  allowedRoles?: AppRole[];
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
