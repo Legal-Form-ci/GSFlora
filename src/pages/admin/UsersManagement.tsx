@@ -99,9 +99,10 @@ const UsersManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const DEFAULT_PASSWORD = 'GSFlora';
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    password: DEFAULT_PASSWORD,
     first_name: '',
     last_name: '',
     phone: '',
@@ -268,7 +269,7 @@ const UsersManagement = () => {
   const resetForm = () => {
     setFormData({
       email: '',
-      password: '',
+      password: DEFAULT_PASSWORD,
       first_name: '',
       last_name: '',
       phone: '',
@@ -433,12 +434,16 @@ const UsersManagement = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Mot de passe *</Label>
+              <Label>Mot de passe par défaut</Label>
               <Input
-                type="password"
+                type="text"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                disabled
+                className="bg-muted text-muted-foreground"
               />
+              <p className="text-xs text-muted-foreground">
+                ⚠️ Informez l'utilisateur qu'il devra changer son mot de passe à la première connexion.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Téléphone</Label>
