@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Bell,
   Settings,
   LogOut,
   Menu,
@@ -19,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
 
 interface NavItem {
   label: string;
@@ -46,6 +46,11 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
   const roleLabels: Record<string, string> = {
     super_admin: 'Super Administrateur',
     admin: 'Administrateur',
+    director: 'Directeur',
+    founder: 'Fondateur',
+    censor: 'Censeur',
+    educator: 'Éducateur',
+    principal_teacher: 'Professeur Principal',
     teacher: 'Enseignant',
     student: 'Élève',
     parent: 'Parent',
@@ -175,10 +180,7 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-              </Button>
+              <NotificationCenter />
             </div>
           </div>
         </header>

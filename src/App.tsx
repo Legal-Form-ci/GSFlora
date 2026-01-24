@@ -20,6 +20,7 @@ import EducatorDashboard from "./pages/dashboard/EducatorDashboard";
 import CensorDashboard from "./pages/dashboard/CensorDashboard";
 import FounderDashboard from "./pages/dashboard/FounderDashboard";
 import PrincipalTeacherDashboard from "./pages/dashboard/PrincipalTeacherDashboard";
+import DirectorDashboard from "./pages/dashboard/DirectorDashboard";
 
 // Admin pages
 import UsersManagement from "./pages/admin/UsersManagement";
@@ -55,20 +56,22 @@ const DashboardRedirect = () => {
     case 'super_admin':
     case 'admin':
       return <Navigate to="/admin" replace />;
+    case 'founder':
+      return <Navigate to="/founder" replace />;
+    case 'director':
+      return <Navigate to="/director" replace />;
+    case 'censor':
+      return <Navigate to="/censor" replace />;
+    case 'educator':
+      return <Navigate to="/educator" replace />;
+    case 'principal_teacher':
+      return <Navigate to="/principal-teacher" replace />;
     case 'teacher':
       return <Navigate to="/teacher" replace />;
     case 'student':
       return <Navigate to="/student" replace />;
     case 'parent':
       return <Navigate to="/parent" replace />;
-    case 'educator':
-      return <Navigate to="/educator" replace />;
-    case 'censor':
-      return <Navigate to="/censor" replace />;
-    case 'founder':
-      return <Navigate to="/founder" replace />;
-    case 'principal_teacher':
-      return <Navigate to="/principal-teacher" replace />;
     default:
       return <Index />;
   }
@@ -255,6 +258,146 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin', 'parent']}>
             <ParentDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Founder routes */}
+      <Route
+        path="/founder"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder']}>
+            <FounderDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/founder/*"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder']}>
+            <FounderDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Director routes */}
+      <Route
+        path="/director"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <DirectorDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/director/schedules"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <SchedulesManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/director/users"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <UsersManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/director/classes"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <ClassesManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/director/subjects"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <SubjectsManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/director/statistics"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <StatisticsDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/director/announcements"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
+            <AnnouncementsManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Censor routes */}
+      <Route
+        path="/censor"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'censor']}>
+            <CensorDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/censor/*"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'censor']}>
+            <CensorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Educator routes */}
+      <Route
+        path="/educator"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'censor', 'educator']}>
+            <EducatorDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/educator/*"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'censor', 'educator']}>
+            <EducatorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Principal Teacher routes */}
+      <Route
+        path="/principal-teacher"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'principal_teacher']}>
+            <PrincipalTeacherDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/principal-teacher/*"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'principal_teacher']}>
+            <PrincipalTeacherDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Shared routes */}
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
           </ProtectedRoute>
         }
       />
