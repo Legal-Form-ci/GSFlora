@@ -36,10 +36,14 @@ import CourseEditor from "./pages/teacher/CourseEditor";
 import AssignmentsList from "./pages/teacher/AssignmentsList";
 import QuizManager from "./pages/teacher/QuizManager";
 import GradesEntry from "./pages/teacher/GradesEntry";
+import ReportCards from "./pages/teacher/ReportCards";
 
 // Student pages
 import QuizList from "./pages/student/QuizList";
 import QuizTaking from "./pages/student/QuizTaking";
+
+// Educator pages
+import AttendanceManagement from "./pages/educator/AttendanceManagement";
 
 // Profile pages
 import ProfilePage from "./pages/profile/ProfilePage";
@@ -225,6 +229,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/teacher/report-cards"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher', 'principal_teacher']}>
+            <ReportCards />
+          </ProtectedRoute>
+        }
+      />
       
       {/* Student routes */}
       <Route
@@ -370,6 +382,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'censor', 'educator']}>
             <EducatorDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/educator/attendance"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director', 'censor', 'educator']}>
+            <AttendanceManagement />
           </ProtectedRoute>
         }
       />

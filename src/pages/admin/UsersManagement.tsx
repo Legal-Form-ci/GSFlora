@@ -52,6 +52,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import TeacherSubjectsSelect from '@/components/users/TeacherSubjectsSelect';
 
 const navItems = [
   { label: 'Tableau de bord', href: '/admin', icon: <Home className="w-5 h-5" /> },
@@ -63,7 +64,7 @@ const navItems = [
   { label: 'Paramètres', href: '/admin/settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
-type AppRole = 'super_admin' | 'admin' | 'teacher' | 'student' | 'parent';
+type AppRole = 'super_admin' | 'admin' | 'teacher' | 'student' | 'parent' | 'founder' | 'director' | 'censor' | 'educator' | 'principal_teacher';
 
 interface User {
   id: string;
@@ -78,6 +79,11 @@ interface User {
 const roleLabels: Record<AppRole, string> = {
   super_admin: 'Super Admin',
   admin: 'Administrateur',
+  founder: 'Fondateur',
+  director: 'Directeur',
+  censor: 'Censeur',
+  educator: 'Éducateur',
+  principal_teacher: 'Prof. Principal',
   teacher: 'Enseignant',
   student: 'Élève',
   parent: 'Parent',
@@ -86,6 +92,11 @@ const roleLabels: Record<AppRole, string> = {
 const roleColors: Record<AppRole, string> = {
   super_admin: 'bg-red-100 text-red-800',
   admin: 'bg-purple-100 text-purple-800',
+  founder: 'bg-amber-100 text-amber-800',
+  director: 'bg-indigo-100 text-indigo-800',
+  censor: 'bg-cyan-100 text-cyan-800',
+  educator: 'bg-teal-100 text-teal-800',
+  principal_teacher: 'bg-violet-100 text-violet-800',
   teacher: 'bg-blue-100 text-blue-800',
   student: 'bg-green-100 text-green-800',
   parent: 'bg-yellow-100 text-yellow-800',
@@ -108,6 +119,8 @@ const UsersManagement = () => {
     phone: '',
     role: 'student' as AppRole,
   });
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [primarySubject, setPrimarySubject] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -186,10 +199,28 @@ const UsersManagement = () => {
         });
 
         // Create role
-        await supabase.from('user_roles').insert({
+        const roleInsert = {
           user_id: authData.user.id,
-          role: formData.role,
-        });
+          role: formData.role as any,
+        };
+        await supabase.from('user_roles').insert(roleInsert);
+
+        // Create user settings with must_change_password = true
+        const settingsInsert = {
+          user_id: authData.user.id,
+          must_change_password: true,
+        };
+        await supabase.from('user_settings').insert(settingsInsert);
+
+        // If teacher, assign subjects
+        if ((formData.role === 'teacher' || formData.role === 'principal_teacher') && selectedSubjects.length > 0) {
+          const subjectAssignments = selectedSubjects.map(subjectId => ({
+            teacher_id: authData.user!.id,
+            subject_id: subjectId,
+            is_primary: subjectId === primarySubject,
+          }));
+          await supabase.from('teacher_subjects').insert(subjectAssignments);
+        }
       }
 
       toast.success('Utilisateur créé avec succès');
@@ -220,12 +251,13 @@ const UsersManagement = () => {
         .eq('id', selectedUser.id);
 
       // Update role
+      const roleUpsert = {
+        user_id: selectedUser.id,
+        role: formData.role as any,
+      };
       await supabase
         .from('user_roles')
-        .upsert({
-          user_id: selectedUser.id,
-          role: formData.role,
-        }, { onConflict: 'user_id,role' });
+        .upsert(roleUpsert, { onConflict: 'user_id,role' });
 
       toast.success('Utilisateur mis à jour');
       setShowEditModal(false);
@@ -275,6 +307,8 @@ const UsersManagement = () => {
       phone: '',
       role: 'student',
     });
+    setSelectedSubjects([]);
+    setPrimarySubject('');
     setSelectedUser(null);
   };
 
@@ -460,12 +494,26 @@ const UsersManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Administrateur</SelectItem>
+                  <SelectItem value="director">Directeur</SelectItem>
+                  <SelectItem value="censor">Censeur</SelectItem>
+                  <SelectItem value="educator">Éducateur</SelectItem>
+                  <SelectItem value="principal_teacher">Professeur Principal</SelectItem>
                   <SelectItem value="teacher">Enseignant</SelectItem>
                   <SelectItem value="student">Élève</SelectItem>
                   <SelectItem value="parent">Parent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Subject assignment for teachers */}
+            {(formData.role === 'teacher' || formData.role === 'principal_teacher') && (
+              <TeacherSubjectsSelect
+                selectedSubjects={selectedSubjects}
+                onSubjectsChange={setSelectedSubjects}
+                primarySubject={primarySubject}
+                onPrimaryChange={setPrimarySubject}
+              />
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowAddModal(false); resetForm(); }}>
