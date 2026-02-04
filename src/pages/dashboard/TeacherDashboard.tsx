@@ -28,6 +28,7 @@ const navItems = [
   { label: 'Devoirs', href: '/teacher/assignments', icon: <FileText className="w-5 h-5" /> },
   { label: 'Quiz', href: '/teacher/quizzes', icon: <ClipboardList className="w-5 h-5" /> },
   { label: 'Notes', href: '/teacher/grades', icon: <BarChart3 className="w-5 h-5" /> },
+  { label: 'Bulletins', href: '/teacher/report-cards', icon: <FileText className="w-5 h-5" /> },
   { label: 'Élèves', href: '/teacher/students', icon: <Users className="w-5 h-5" /> },
   { label: 'Emploi du temps', href: '/teacher/schedule', icon: <Calendar className="w-5 h-5" /> },
 ];

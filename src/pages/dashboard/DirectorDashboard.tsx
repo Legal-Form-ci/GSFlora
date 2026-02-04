@@ -27,10 +27,12 @@ import {
 
 const navItems = [
   { label: 'Tableau de bord', href: '/director', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { label: 'Générateur EDT', href: '/director/schedule-generator', icon: <CalendarDays className="w-5 h-5" /> },
   { label: 'Emplois du temps', href: '/director/schedules', icon: <Calendar className="w-5 h-5" /> },
   { label: 'Utilisateurs', href: '/director/users', icon: <Users className="w-5 h-5" /> },
   { label: 'Classes', href: '/director/classes', icon: <GraduationCap className="w-5 h-5" /> },
   { label: 'Matières', href: '/director/subjects', icon: <BookOpen className="w-5 h-5" /> },
+  { label: 'Cartes élèves', href: '/admin/student-cards', icon: <FileText className="w-5 h-5" /> },
   { label: 'Statistiques', href: '/director/statistics', icon: <BarChart3 className="w-5 h-5" /> },
   { label: 'Annonces', href: '/director/announcements', icon: <Megaphone className="w-5 h-5" /> },
   { label: 'Messages', href: '/messages', icon: <MessageSquare className="w-5 h-5" /> },
