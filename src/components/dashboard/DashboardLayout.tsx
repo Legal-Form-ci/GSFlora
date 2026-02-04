@@ -7,6 +7,7 @@ import {
   Menu,
   ChevronDown,
   UserCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import UserGuide from '@/components/dashboard/UserGuide';
 
 interface NavItem {
   label: string;
@@ -37,6 +40,14 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+
+  // Map role to guide type
+  const getGuideRole = () => {
+    if (!role) return 'student';
+    if (role === 'super_admin' || role === 'admin') return 'super_admin';
+    return role;
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -180,6 +191,16 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
             </div>
 
             <div className="flex items-center gap-2">
+              <Dialog open={showGuide} onOpenChange={setShowGuide}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <HelpCircle className="w-5 h-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto p-0">
+                  <UserGuide role={getGuideRole() as any} onClose={() => setShowGuide(false)} />
+                </DialogContent>
+              </Dialog>
               <NotificationCenter />
             </div>
           </div>

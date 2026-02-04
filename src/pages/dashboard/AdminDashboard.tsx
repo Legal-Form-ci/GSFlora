@@ -28,6 +28,7 @@ const navItems = [
   { label: 'Classes', href: '/admin/classes', icon: <GraduationCap className="w-5 h-5" /> },
   { label: 'Matières', href: '/admin/subjects', icon: <BookOpen className="w-5 h-5" /> },
   { label: 'Emplois du temps', href: '/admin/schedules', icon: <Calendar className="w-5 h-5" /> },
+  { label: 'Cartes élèves', href: '/admin/student-cards', icon: <Users className="w-5 h-5" /> },
   { label: 'Statistiques', href: '/admin/stats', icon: <BarChart3 className="w-5 h-5" /> },
   { label: 'Annonces', href: '/admin/announcements', icon: <Bell className="w-5 h-5" /> },
   { label: 'Paramètres', href: '/admin/settings', icon: <Settings className="w-5 h-5" /> },

@@ -29,6 +29,7 @@ import SubjectsManagement from "./pages/admin/SubjectsManagement";
 import AnnouncementsManagement from "./pages/admin/AnnouncementsManagement";
 import SchedulesManagement from "./pages/admin/SchedulesManagement";
 import StatisticsDashboard from "./pages/admin/StatisticsDashboard";
+import StudentCards from "./pages/admin/StudentCards";
 
 // Teacher pages
 import CoursesList from "./pages/teacher/CoursesList";
@@ -168,6 +169,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
             <AnnouncementsManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/student-cards"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'director']}>
+            <StudentCards />
           </ProtectedRoute>
         }
       />
