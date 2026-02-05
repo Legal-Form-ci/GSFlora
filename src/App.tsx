@@ -21,6 +21,7 @@ import CensorDashboard from "./pages/dashboard/CensorDashboard";
 import FounderDashboard from "./pages/dashboard/FounderDashboard";
 import PrincipalTeacherDashboard from "./pages/dashboard/PrincipalTeacherDashboard";
 import DirectorDashboard from "./pages/dashboard/DirectorDashboard";
+import AccountantDashboard from "./pages/dashboard/AccountantDashboard";
 
 // Admin pages
 import UsersManagement from "./pages/admin/UsersManagement";
@@ -454,6 +455,24 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['super_admin', 'founder', 'director']}>
             <ScheduleGenerator />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Accountant routes */}
+      <Route
+        path="/accountant"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'founder']}>
+            <AccountantDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/accountant/*"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin', 'founder']}>
+            <AccountantDashboard />
           </ProtectedRoute>
         }
       />

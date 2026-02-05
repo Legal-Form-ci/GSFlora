@@ -17,6 +17,7 @@ import {
   UserPlus,
   ChevronRight,
   TrendingUp,
+  DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,7 @@ const navItems = [
   { label: 'Matières', href: '/admin/subjects', icon: <BookOpen className="w-5 h-5" /> },
   { label: 'Emplois du temps', href: '/admin/schedules', icon: <Calendar className="w-5 h-5" /> },
   { label: 'Cartes élèves', href: '/admin/student-cards', icon: <Users className="w-5 h-5" /> },
+  { label: 'Comptabilité', href: '/accountant', icon: <DollarSign className="w-5 h-5" /> },
   { label: 'Statistiques', href: '/admin/stats', icon: <BarChart3 className="w-5 h-5" /> },
   { label: 'Annonces', href: '/admin/announcements', icon: <Bell className="w-5 h-5" /> },
   { label: 'Paramètres', href: '/admin/settings', icon: <Settings className="w-5 h-5" /> },
