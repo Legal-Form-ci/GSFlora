@@ -20,6 +20,7 @@ import {
   Globe,
   Shield,
   Loader2,
+  DollarSign,
 } from 'lucide-react';
 import {
   PieChart,
@@ -37,6 +38,7 @@ import {
 const navItems = [
   { label: 'Tableau de bord', href: '/founder', icon: <Home className="w-5 h-5" /> },
   { label: 'Vue d\'ensemble', href: '/founder/overview', icon: <Building2 className="w-5 h-5" /> },
+  { label: 'Comptabilité', href: '/accountant', icon: <DollarSign className="w-5 h-5" /> },
   { label: 'Statistiques', href: '/founder/stats', icon: <BarChart3 className="w-5 h-5" /> },
   { label: 'Personnel', href: '/founder/staff', icon: <Users className="w-5 h-5" /> },
   { label: 'Messages', href: '/messages', icon: <MessageSquare className="w-5 h-5" /> },
