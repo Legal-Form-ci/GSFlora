@@ -278,9 +278,11 @@ const EducatorDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              <Button>
-                <ClipboardCheck className="w-4 h-4 mr-2" />
-                Prendre les présences
+              <Button asChild>
+                <a href="/educator/attendance">
+                  <ClipboardCheck className="w-4 h-4 mr-2" />
+                  Prendre les présences
+                </a>
               </Button>
               <Button variant="outline">
                 <AlertTriangle className="w-4 h-4 mr-2" />

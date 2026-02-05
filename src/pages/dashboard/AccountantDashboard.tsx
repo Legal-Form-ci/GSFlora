@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -23,10 +23,28 @@ import {
   Download,
   CreditCard,
   Receipt,
-  PieChart,
-  LayoutDashboard
+  PieChart as PieChartIcon,
+  LayoutDashboard,
+  BarChart3
 } from "lucide-react";
 import jsPDF from "jspdf";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+  AreaChart,
+  Area,
+} from "recharts";
 
 const AccountantDashboard = () => {
   const queryClient = useQueryClient();
@@ -303,6 +321,51 @@ const AccountantDashboard = () => {
     "Autres",
   ];
 
+  // Prepare chart data
+  const expensesByCategory = useMemo(() => {
+    const categoryTotals: Record<string, number> = {};
+    expenses.forEach((e: any) => {
+      categoryTotals[e.category] = (categoryTotals[e.category] || 0) + Number(e.amount);
+    });
+    return Object.entries(categoryTotals).map(([name, value]) => ({ name, value }));
+  }, [expenses]);
+
+  const monthlyRevenue = useMemo(() => {
+    const monthlyData: Record<string, { revenue: number; expenses: number }> = {};
+    
+    payments.forEach((p: any) => {
+      const month = format(new Date(p.payment_date), 'MMM', { locale: fr });
+      if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0 };
+      monthlyData[month].revenue += Number(p.amount);
+    });
+    
+    expenses.forEach((e: any) => {
+      const month = format(new Date(e.expense_date), 'MMM', { locale: fr });
+      if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0 };
+      monthlyData[month].expenses += Number(e.amount);
+    });
+    
+    return Object.entries(monthlyData).map(([month, data]) => ({
+      month,
+      Recettes: data.revenue,
+      Dépenses: data.expenses,
+      Solde: data.revenue - data.expenses,
+    }));
+  }, [payments, expenses]);
+
+  const paymentMethodStats = useMemo(() => {
+    const methods: Record<string, number> = {};
+    payments.forEach((p: any) => {
+      const method = p.payment_method === 'cash' ? 'Espèces' :
+                     p.payment_method === 'bank_transfer' ? 'Virement' :
+                     p.payment_method === 'mobile_money' ? 'Mobile Money' : 'Chèque';
+      methods[method] = (methods[method] || 0) + Number(p.amount);
+    });
+    return Object.entries(methods).map(([name, value]) => ({ name, value }));
+  }, [payments]);
+
+  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+
   return (
     <DashboardLayout 
       title="Tableau de Bord Comptable" 
@@ -310,7 +373,8 @@ const AccountantDashboard = () => {
         { label: "Tableau de bord", href: "/accountant", icon: <LayoutDashboard className="w-5 h-5" /> },
         { label: "Paiements", href: "/accountant/payments", icon: <CreditCard className="w-5 h-5" /> },
         { label: "Dépenses", href: "/accountant/expenses", icon: <Receipt className="w-5 h-5" /> },
-        { label: "Frais de scolarité", href: "/accountant/fees", icon: <PieChart className="w-5 h-5" /> },
+        { label: "Frais de scolarité", href: "/accountant/fees", icon: <PieChartIcon className="w-5 h-5" /> },
+        { label: "Rapports", href: "/accountant/reports", icon: <BarChart3 className="w-5 h-5" /> },
       ]}
     >
       <div className="space-y-6">
@@ -359,6 +423,156 @@ const AccountantDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{totalStudents}</div>
               <p className="text-xs opacity-80 mt-1">Année {currentYear}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Financial Charts */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Revenue vs Expenses Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Évolution Financière Mensuelle
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={monthlyRevenue} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`} />
+                    <Tooltip 
+                      formatter={(value: number) => `${value.toLocaleString()} FCFA`}
+                      labelStyle={{ color: '#000' }}
+                    />
+                    <Legend />
+                    <Area 
+                      type="monotone" 
+                      dataKey="Recettes" 
+                      stackId="1"
+                      stroke="#10b981" 
+                      fill="#10b981" 
+                      fillOpacity={0.6}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="Dépenses" 
+                      stackId="2"
+                      stroke="#ef4444" 
+                      fill="#ef4444"
+                      fillOpacity={0.6}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Expenses by Category Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PieChartIcon className="w-5 h-5" />
+                Répartition des Dépenses
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                {expensesByCategory.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={expensesByCategory}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {expensesByCategory.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value: number) => `${value.toLocaleString()} FCFA`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    Aucune dépense enregistrée
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment Methods Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Modes de Paiement
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                {paymentMethodStats.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={paymentMethodStats} layout="vertical" margin={{ left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`} />
+                      <YAxis type="category" dataKey="name" width={80} />
+                      <Tooltip formatter={(value: number) => `${value.toLocaleString()} FCFA`} />
+                      <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    Aucun paiement enregistré
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Net Balance Trend */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Évolution du Solde Net
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                {monthlyRevenue.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={monthlyRevenue} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`} />
+                      <Tooltip formatter={(value: number) => `${value.toLocaleString()} FCFA`} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="Solde" 
+                        stroke="#3b82f6" 
+                        strokeWidth={3}
+                        dot={{ fill: '#3b82f6', strokeWidth: 2 }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    Aucune donnée disponible
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
