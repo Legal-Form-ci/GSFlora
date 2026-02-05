@@ -1,8 +1,9 @@
 import { BookOpen, GraduationCap, Users, ChartBar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoFlora from "@/assets/logo-flora.jpeg";
 
 const HeroSection = () => {
+  // Using logo from public folder for better loading
+  const logoFlora = "/logo-flora.png";
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero">
       {/* Animated background elements */}
