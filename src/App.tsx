@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { SchoolProvider } from "./contexts/SchoolContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
@@ -208,7 +209,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes />
+          <SchoolProvider>
+            <AppRoutes />
+          </SchoolProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
