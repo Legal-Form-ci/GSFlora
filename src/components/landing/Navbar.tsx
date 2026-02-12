@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, LogIn } from "lucide-react";
+import { Menu, X, LogIn, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -12,23 +12,21 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img 
-              src="/logo-flora.png" 
-              alt="Groupe Scolaire Flora" 
-              className="w-12 h-12 md:w-14 md:h-14 object-contain"
-            />
-            <div className="hidden sm:block">
-              <h1 className="font-display text-lg md:text-xl font-bold text-flora-blue">GS Flora</h1>
-              <p className="text-xs text-muted-foreground -mt-1">Digital</p>
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded-xl flex items-center justify-center">
+              <Building2 className="w-6 h-6 md:w-7 md:h-7 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="font-display text-lg md:text-xl font-bold text-foreground">SchoolHub Pro</h1>
+              <p className="text-xs text-muted-foreground -mt-1">Plateforme éducative</p>
             </div>
           </Link>
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-foreground hover:text-flora-blue transition-colors font-medium">Accueil</a>
-            <a href="#features" className="text-muted-foreground hover:text-flora-blue transition-colors">Fonctionnalités</a>
-            <a href="#about" className="text-muted-foreground hover:text-flora-blue transition-colors">À propos</a>
-            <a href="#contact" className="text-muted-foreground hover:text-flora-blue transition-colors">Contact</a>
+            <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">Fonctionnalités</a>
+            <a href="#roles" className="text-muted-foreground hover:text-primary transition-colors">Pour qui ?</a>
+            <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">Tarifs</a>
+            <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</a>
           </div>
 
           {/* Desktop CTA */}
@@ -39,21 +37,14 @@ const Navbar = () => {
             <Button asChild>
               <Link to="/auth?mode=signup">
                 <LogIn className="w-4 h-4" />
-                Inscription
+                Créer un établissement
               </Link>
             </Button>
           </div>
 
           {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? (
-              <X className="w-6 h-6 text-foreground" />
-            ) : (
-              <Menu className="w-6 h-6 text-foreground" />
-            )}
+          <button className="md:hidden p-2" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X className="w-6 h-6 text-foreground" /> : <Menu className="w-6 h-6 text-foreground" />}
           </button>
         </div>
 
@@ -61,10 +52,10 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-4">
-              <a href="#" className="text-foreground font-medium py-2">Accueil</a>
-              <a href="#features" className="text-muted-foreground py-2">Fonctionnalités</a>
-              <a href="#about" className="text-muted-foreground py-2">À propos</a>
-              <a href="#contact" className="text-muted-foreground py-2">Contact</a>
+              <a href="#features" className="text-muted-foreground py-2" onClick={() => setIsOpen(false)}>Fonctionnalités</a>
+              <a href="#roles" className="text-muted-foreground py-2" onClick={() => setIsOpen(false)}>Pour qui ?</a>
+              <a href="#pricing" className="text-muted-foreground py-2" onClick={() => setIsOpen(false)}>Tarifs</a>
+              <a href="#contact" className="text-muted-foreground py-2" onClick={() => setIsOpen(false)}>Contact</a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button variant="outline" className="w-full" asChild>
                   <Link to="/auth?mode=login">Se connecter</Link>
@@ -72,7 +63,7 @@ const Navbar = () => {
                 <Button className="w-full" asChild>
                   <Link to="/auth?mode=signup">
                     <LogIn className="w-4 h-4" />
-                    Inscription
+                    Créer un établissement
                   </Link>
                 </Button>
               </div>

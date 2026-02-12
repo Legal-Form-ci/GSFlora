@@ -8,7 +8,10 @@ import {
   ChevronDown,
   UserCircle,
   HelpCircle,
+  Building2,
 } from 'lucide-react';
+import BottomTabBar from '@/components/mobile/BottomTabBar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -41,6 +44,8 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const isMobile = useIsMobile();
+  const showBottomNav = isMobile && (role === 'student' || role === 'parent');
 
   // Map role to guide type
   const getGuideRole = () => {
@@ -90,18 +95,16 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-4 border-b border-sidebar-border">
+           <div className="p-4 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-3">
-              <img
-                src="/logo-flora.png"
-                alt="GS Flora"
-                className="w-10 h-10 object-contain"
-              />
+              <div className="w-10 h-10 bg-sidebar-primary rounded-xl flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-sidebar-primary-foreground" />
+              </div>
               <div>
                 <h1 className="font-display text-lg font-bold text-sidebar-foreground">
-                  GS Flora
+                  SchoolHub Pro
                 </h1>
-                <p className="text-xs text-sidebar-foreground/60">Digital</p>
+                <p className="text-xs text-sidebar-foreground/60">Plateforme</p>
               </div>
             </Link>
           </div>
@@ -207,7 +210,10 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className={`p-4 lg:p-6 ${showBottomNav ? 'pb-24' : ''}`}>{children}</main>
+
+        {/* Mobile bottom tab bar for students/parents */}
+        {showBottomNav && role && <BottomTabBar role={role as 'student' | 'parent'} />}
       </div>
     </div>
   );
