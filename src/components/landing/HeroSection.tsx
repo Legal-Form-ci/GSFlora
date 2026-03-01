@@ -37,7 +37,7 @@ const HeroSection = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="xl" asChild>
-                <Link to="/auth?mode=signup">
+                <Link to="/create-school">
                   <Building2 className="w-5 h-5" />
                   Créer mon établissement
                 </Link>

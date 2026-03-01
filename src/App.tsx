@@ -60,6 +60,9 @@ import ChangePasswordPage from "./pages/profile/ChangePasswordPage";
 // Director pages
 import ScheduleGenerator from "./pages/director/ScheduleGenerator";
 
+// Onboarding
+import CreateSchool from "./pages/onboarding/CreateSchool";
+
 // Shared pages
 import MessagesPage from "./pages/messages/MessagesPage";
 import AnnouncementsView from "./pages/shared/AnnouncementsView";
@@ -103,6 +106,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={user && !loading ? <DashboardRedirect /> : <Index />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/create-school" element={<ProtectedRoute><CreateSchool /></ProtectedRoute>} />
 
       {/* Admin routes */}
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin', 'admin']}><AdminDashboard /></ProtectedRoute>} />
