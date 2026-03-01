@@ -23,6 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
+import SchoolSelector from '@/components/dashboard/SchoolSelector';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import UserGuide from '@/components/dashboard/UserGuide';
 
@@ -191,6 +192,7 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
               <h1 className="font-display text-xl font-bold text-foreground">
                 {title}
               </h1>
+              <SchoolSelector />
             </div>
 
             <div className="flex items-center gap-2">

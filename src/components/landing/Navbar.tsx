@@ -35,7 +35,7 @@ const Navbar = () => {
               <Link to="/auth?mode=login">Se connecter</Link>
             </Button>
             <Button asChild>
-              <Link to="/auth?mode=signup">
+              <Link to="/create-school">
                 <LogIn className="w-4 h-4" />
                 Créer un établissement
               </Link>
@@ -61,7 +61,7 @@ const Navbar = () => {
                   <Link to="/auth?mode=login">Se connecter</Link>
                 </Button>
                 <Button className="w-full" asChild>
-                  <Link to="/auth?mode=signup">
+                  <Link to="/create-school">
                     <LogIn className="w-4 h-4" />
                     Créer un établissement
                   </Link>
