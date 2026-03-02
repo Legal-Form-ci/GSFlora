@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,48 +8,20 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Home,
-  Users,
-  GraduationCap,
-  BookOpen,
-  Calendar,
-  Bell,
-  Settings,
-  Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Loader2,
-  UserPlus,
+  Home, Users, GraduationCap, BookOpen, Calendar, Bell, Settings,
+  Plus, Search, MoreHorizontal, Edit, Trash2, Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -72,13 +45,14 @@ interface Class {
 }
 
 const cycles = ['Primaire', 'Collège', 'Lycée'];
-const levels = {
+const levels: Record<string, string[]> = {
   Primaire: ['CP', 'CE1', 'CE2', 'CM1', 'CM2'],
   Collège: ['6ème', '5ème', '4ème', '3ème'],
   Lycée: ['Seconde', 'Première', 'Terminale'],
 };
 
 const ClassesManagement = () => {
+  const { currentSchool } = useSchool();
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,38 +60,31 @@ const ClassesManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    level: '',
-    cycle: 'Lycée',
-    year: '2024-2025',
+    name: '', level: '', cycle: 'Lycée', year: '2025-2026',
   });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    if (currentSchool) fetchClasses();
+  }, [currentSchool]);
 
   const fetchClasses = async () => {
+    if (!currentSchool) return;
     try {
-      const { data, error } = await supabase
-        .from('classes')
-        .select('*')
-        .order('name');
-
+      let query = supabase.from('classes').select('*').order('name');
+      query = query.eq('school_id', currentSchool.id);
+      const { data, error } = await query;
       if (error) throw error;
 
-      // Get student counts
       const classesWithCounts = await Promise.all(
         (data || []).map(async (cls) => {
           const { count } = await supabase
             .from('student_classes')
             .select('*', { count: 'exact', head: true })
             .eq('class_id', cls.id);
-
           return { ...cls, student_count: count || 0 };
         })
       );
-
       setClasses(classesWithCounts);
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -132,20 +99,20 @@ const ClassesManagement = () => {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
+    if (!currentSchool) {
+      toast.error('Aucun établissement sélectionné');
+      return;
+    }
 
     setSaving(true);
     try {
       if (editingClass) {
-        await supabase
-          .from('classes')
-          .update(formData)
-          .eq('id', editingClass.id);
+        await supabase.from('classes').update(formData).eq('id', editingClass.id);
         toast.success('Classe mise à jour');
       } else {
-        await supabase.from('classes').insert(formData);
+        await supabase.from('classes').insert({ ...formData, school_id: currentSchool.id });
         toast.success('Classe créée');
       }
-      
       setShowModal(false);
       resetForm();
       fetchClasses();
@@ -159,7 +126,6 @@ const ClassesManagement = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette classe ?')) return;
-
     try {
       await supabase.from('classes').delete().eq('id', id);
       toast.success('Classe supprimée');
@@ -172,17 +138,12 @@ const ClassesManagement = () => {
 
   const openEditModal = (cls: Class) => {
     setEditingClass(cls);
-    setFormData({
-      name: cls.name,
-      level: cls.level,
-      cycle: cls.cycle,
-      year: cls.year,
-    });
+    setFormData({ name: cls.name, level: cls.level, cycle: cls.cycle, year: cls.year });
     setShowModal(true);
   };
 
   const resetForm = () => {
-    setFormData({ name: '', level: '', cycle: 'Lycée', year: '2024-2025' });
+    setFormData({ name: '', level: '', cycle: 'Lycée', year: '2025-2026' });
     setEditingClass(null);
   };
 
@@ -205,54 +166,38 @@ const ClassesManagement = () => {
   return (
     <DashboardLayout navItems={navItems} title="Gestion des classes">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
           <div className="flex flex-1 gap-4">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher une classe..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              <Input placeholder="Rechercher une classe..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
             <Select value={cycleFilter} onValueChange={setCycleFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrer par cycle" />
-              </SelectTrigger>
+              <SelectTrigger className="w-48"><SelectValue placeholder="Filtrer par cycle" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les cycles</SelectItem>
-                {cycles.map(cycle => (
-                  <SelectItem key={cycle} value={cycle}>{cycle}</SelectItem>
-                ))}
+                {cycles.map(cycle => (<SelectItem key={cycle} value={cycle}>{cycle}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <Button onClick={() => { resetForm(); setShowModal(true); }}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvelle classe
+            <Plus className="w-4 h-4 mr-2" /> Nouvelle classe
           </Button>
         </div>
 
-        {/* Classes Table */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="w-5 h-5" />
-              Classes ({filteredClasses.length})
+              <GraduationCap className="w-5 h-5" /> Classes ({filteredClasses.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Niveau</TableHead>
-                  <TableHead>Cycle</TableHead>
-                  <TableHead>Année</TableHead>
-                  <TableHead>Élèves</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Nom</TableHead><TableHead>Niveau</TableHead>
+                  <TableHead>Cycle</TableHead><TableHead>Année</TableHead>
+                  <TableHead>Élèves</TableHead><TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -260,34 +205,20 @@ const ClassesManagement = () => {
                   <TableRow key={cls.id}>
                     <TableCell className="font-medium">{cls.name}</TableCell>
                     <TableCell>{cls.level}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{cls.cycle}</Badge>
-                    </TableCell>
+                    <TableCell><Badge variant="outline">{cls.cycle}</Badge></TableCell>
                     <TableCell>{cls.year}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        <Users className="w-3 h-3 mr-1" />
-                        {cls.student_count}
-                      </Badge>
-                    </TableCell>
+                    <TableCell><Badge variant="secondary"><Users className="w-3 h-3 mr-1" />{cls.student_count}</Badge></TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEditModal(cls)}>
-                            <Edit className="w-4 h-4 mr-2" />
-                            Modifier
+                            <Edit className="w-4 h-4 mr-2" /> Modifier
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(cls.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Supprimer
+                          <DropdownMenuItem onClick={() => handleDelete(cls.id)} className="text-red-600">
+                            <Trash2 className="w-4 h-4 mr-2" /> Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -300,67 +231,41 @@ const ClassesManagement = () => {
         </Card>
       </div>
 
-      {/* Add/Edit Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingClass ? 'Modifier la classe' : 'Nouvelle classe'}
-            </DialogTitle>
+            <DialogTitle>{editingClass ? 'Modifier la classe' : 'Nouvelle classe'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nom de la classe *</Label>
-              <Input
-                placeholder="Ex: Terminale A"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
+              <Input placeholder="Ex: Terminale A" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>Cycle *</Label>
-              <Select 
-                value={formData.cycle} 
-                onValueChange={(v) => setFormData({ ...formData, cycle: v, level: '' })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+              <Select value={formData.cycle} onValueChange={(v) => setFormData({ ...formData, cycle: v, level: '' })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {cycles.map(cycle => (
-                    <SelectItem key={cycle} value={cycle}>{cycle}</SelectItem>
-                  ))}
+                  {cycles.map(cycle => (<SelectItem key={cycle} value={cycle}>{cycle}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Niveau *</Label>
-              <Select 
-                value={formData.level} 
-                onValueChange={(v) => setFormData({ ...formData, level: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
+              <Select value={formData.level} onValueChange={(v) => setFormData({ ...formData, level: v })}>
+                <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent>
-                  {levels[formData.cycle as keyof typeof levels]?.map(level => (
-                    <SelectItem key={level} value={level}>{level}</SelectItem>
-                  ))}
+                  {levels[formData.cycle]?.map(level => (<SelectItem key={level} value={level}>{level}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Année scolaire *</Label>
-              <Input
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-              />
+              <Input value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowModal(false); resetForm(); }}>
-              Annuler
-            </Button>
+            <Button variant="outline" onClick={() => { setShowModal(false); resetForm(); }}>Annuler</Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingClass ? 'Enregistrer' : 'Créer'}
