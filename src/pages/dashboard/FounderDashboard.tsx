@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/dashboard/StatCard';
 import AttendanceChart from '@/components/dashboard/charts/AttendanceChart';
@@ -26,6 +27,7 @@ const navItems = [
 
 const FounderDashboard = () => {
   const { profile } = useAuth();
+  const { currentSchool } = useSchool();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0, totalStudents: 0, totalTeachers: 0,
@@ -33,41 +35,45 @@ const FounderDashboard = () => {
     totalRevenue: 0, totalExpenses: 0,
   });
 
-  useEffect(() => { fetchDashboardData(); }, []);
+  useEffect(() => { if (currentSchool) fetchDashboardData(); }, [currentSchool]);
 
   const fetchDashboardData = async () => {
+    if (!currentSchool) return;
+    const schoolId = currentSchool.id;
     try {
-      const [usersRes, studentsRes, teachersRes, classesRes, coursesRes] = await Promise.all([
-        supabase.from('user_roles').select('*', { count: 'exact', head: true }),
-        supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
-        supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'teacher'),
-        supabase.from('classes').select('*', { count: 'exact', head: true }),
-        supabase.from('courses').select('*', { count: 'exact', head: true }),
+      // Members counts
+      const { data: members } = await supabase
+        .from('school_members').select('role')
+        .eq('school_id', schoolId).eq('is_active', true);
+
+      const totalUsers = members?.length || 0;
+      const totalStudents = members?.filter(m => m.role === 'student').length || 0;
+      const totalTeachers = members?.filter(m => m.role === 'teacher').length || 0;
+
+      const [classesRes, coursesRes] = await Promise.all([
+        supabase.from('classes').select('*', { count: 'exact', head: true }).eq('school_id', schoolId),
+        supabase.from('courses').select('*', { count: 'exact', head: true }).eq('school_id', schoolId),
       ]);
 
-      const { data: grades } = await supabase.from('grades').select('score, max_score');
+      const { data: grades } = await supabase.from('grades').select('score, max_score').eq('school_id', schoolId);
       const avgGrade = grades?.length
         ? grades.reduce((sum, g) => sum + (g.score / (g.max_score || 20)) * 20, 0) / grades.length : 0;
 
-      const { data: attendance } = await supabase.from('attendance').select('status');
+      const { data: attendance } = await supabase.from('attendance').select('status').eq('school_id', schoolId);
       const presentCount = attendance?.filter((a) => a.status === 'present').length || 0;
       const attendanceRate = attendance?.length ? (presentCount / attendance.length) * 100 : 0;
 
       const [paymentsRes, expensesRes] = await Promise.all([
-        supabase.from('student_payments').select('amount'),
-        supabase.from('school_expenses').select('amount'),
+        supabase.from('student_payments').select('amount').eq('school_id', schoolId),
+        supabase.from('school_expenses').select('amount').eq('school_id', schoolId),
       ]);
       const totalRevenue = paymentsRes.data?.reduce((s, p) => s + Number(p.amount), 0) || 0;
       const totalExpenses = expensesRes.data?.reduce((s, e) => s + Number(e.amount), 0) || 0;
 
       setStats({
-        totalUsers: usersRes.count || 0,
-        totalStudents: studentsRes.count || 0,
-        totalTeachers: teachersRes.count || 0,
-        totalClasses: classesRes.count || 0,
-        totalCourses: coursesRes.count || 0,
-        averageGrade: Number(avgGrade.toFixed(2)),
-        attendanceRate: Number(attendanceRate.toFixed(1)),
+        totalUsers, totalStudents, totalTeachers,
+        totalClasses: classesRes.count || 0, totalCourses: coursesRes.count || 0,
+        averageGrade: Number(avgGrade.toFixed(2)), attendanceRate: Number(attendanceRate.toFixed(1)),
         totalRevenue, totalExpenses,
       });
     } catch (error) {
@@ -82,9 +88,7 @@ const FounderDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout navItems={navItems} title="Tableau de bord Fondateur">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+        <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
       </DashboardLayout>
     );
   }
@@ -92,7 +96,6 @@ const FounderDashboard = () => {
   return (
     <DashboardLayout navItems={navItems} title="Tableau de bord Fondateur">
       <div className="space-y-6">
-        {/* Welcome */}
         <div className="bg-gradient-to-r from-accent/20 to-accent/5 rounded-xl p-6">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-accent/30 rounded-xl flex items-center justify-center">
@@ -103,56 +106,31 @@ const FounderDashboard = () => {
                 Bienvenue, {profile?.first_name} {profile?.last_name}
               </h2>
               <p className="text-muted-foreground mt-1">
-                Vue d'ensemble stratégique de votre établissement
+                {currentSchool?.name} — Vue d'ensemble stratégique
               </p>
             </div>
           </div>
         </div>
 
-        {/* KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total utilisateurs" value={stats.totalUsers}
-            icon={<Users className="w-5 h-5" />} iconClassName="bg-primary/10 text-primary"
-            trend={{ value: 12, isPositive: true }} />
-          <StatCard title="Élèves inscrits" value={stats.totalStudents}
-            icon={<GraduationCap className="w-5 h-5" />} iconClassName="bg-flora-success/10 text-flora-success"
-            trend={{ value: 8, isPositive: true }} />
-          <StatCard title="Moyenne générale" value={`${stats.averageGrade}/20`}
-            icon={<TrendingUp className="w-5 h-5" />} iconClassName="bg-secondary/10 text-secondary"
-            trend={stats.averageGrade >= 10 ? { value: 5, isPositive: true } : { value: -2, isPositive: false }} />
-          <StatCard title="Taux de présence" value={`${stats.attendanceRate}%`}
-            icon={<Shield className="w-5 h-5" />} iconClassName="bg-primary/10 text-primary" />
+          <StatCard title="Total utilisateurs" value={stats.totalUsers} icon={<Users className="w-5 h-5" />} iconClassName="bg-primary/10 text-primary" />
+          <StatCard title="Élèves inscrits" value={stats.totalStudents} icon={<GraduationCap className="w-5 h-5" />} iconClassName="bg-flora-success/10 text-flora-success" />
+          <StatCard title="Moyenne générale" value={`${stats.averageGrade}/20`} icon={<TrendingUp className="w-5 h-5" />} iconClassName="bg-secondary/10 text-secondary" />
+          <StatCard title="Taux de présence" value={`${stats.attendanceRate}%`} icon={<Shield className="w-5 h-5" />} iconClassName="bg-primary/10 text-primary" />
         </div>
 
-        {/* Financial KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard title="Revenus totaux" value={formatMoney(stats.totalRevenue)}
-            icon={<DollarSign className="w-5 h-5" />} iconClassName="bg-flora-success/10 text-flora-success" />
-          <StatCard title="Dépenses totales" value={formatMoney(stats.totalExpenses)}
-            icon={<DollarSign className="w-5 h-5" />} iconClassName="bg-destructive/10 text-destructive" />
-          <StatCard title="Solde net" value={formatMoney(stats.totalRevenue - stats.totalExpenses)}
-            icon={<TrendingUp className="w-5 h-5" />}
+          <StatCard title="Revenus totaux" value={formatMoney(stats.totalRevenue)} icon={<DollarSign className="w-5 h-5" />} iconClassName="bg-flora-success/10 text-flora-success" />
+          <StatCard title="Dépenses totales" value={formatMoney(stats.totalExpenses)} icon={<DollarSign className="w-5 h-5" />} iconClassName="bg-destructive/10 text-destructive" />
+          <StatCard title="Solde net" value={formatMoney(stats.totalRevenue - stats.totalExpenses)} icon={<TrendingUp className="w-5 h-5" />}
             iconClassName={stats.totalRevenue >= stats.totalExpenses ? "bg-flora-success/10 text-flora-success" : "bg-destructive/10 text-destructive"} />
         </div>
 
-        {/* Charts */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <RevenueChart />
-          <RoleDistributionChart />
-        </div>
-        <div className="grid lg:grid-cols-2 gap-6">
-          <AttendanceChart />
-          <GradesChart />
-        </div>
+        <div className="grid lg:grid-cols-2 gap-6"><RevenueChart /><RoleDistributionChart /></div>
+        <div className="grid lg:grid-cols-2 gap-6"><AttendanceChart /><GradesChart /></div>
 
-        {/* Institution Overview */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5" />
-              Aperçu de l'établissement
-            </CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" /> Aperçu de l'établissement</CardTitle></CardHeader>
           <CardContent>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="p-4 bg-muted/50 rounded-lg text-center">
@@ -179,25 +157,13 @@ const FounderDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Strategic Actions */}
         <Card>
-          <CardHeader>
-            <CardTitle>Actions stratégiques</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Actions stratégiques</CardTitle></CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              <Button>
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Rapport complet
-              </Button>
-              <Button variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
-                Paramètres institution
-              </Button>
-              <Button variant="outline">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Communication globale
-              </Button>
+              <Button><BarChart3 className="w-4 h-4 mr-2" /> Rapport complet</Button>
+              <Button variant="outline"><Settings className="w-4 h-4 mr-2" /> Paramètres institution</Button>
+              <Button variant="outline"><MessageSquare className="w-4 h-4 mr-2" /> Communication globale</Button>
             </div>
           </CardContent>
         </Card>
