@@ -63,6 +63,9 @@ import ScheduleGenerator from "./pages/director/ScheduleGenerator";
 // Onboarding
 import CreateSchool from "./pages/onboarding/CreateSchool";
 
+// Platform Admin
+import PlatformAdmin from "./pages/admin/PlatformAdmin";
+
 // Shared pages
 import MessagesPage from "./pages/messages/MessagesPage";
 import AnnouncementsView from "./pages/shared/AnnouncementsView";
@@ -120,6 +123,10 @@ const AppRoutes = () => {
       <Route path="/admin/announcements/new" element={<ProtectedRoute allowedRoles={['super_admin', 'admin']}><AnnouncementsManagement /></ProtectedRoute>} />
       <Route path="/admin/student-cards" element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'director']}><StudentCards /></ProtectedRoute>} />
       <Route path="/admin/stats" element={<ProtectedRoute allowedRoles={['super_admin', 'admin']}><StatisticsDashboard /></ProtectedRoute>} />
+
+      {/* Platform Admin routes */}
+      <Route path="/platform-admin" element={<ProtectedRoute allowedRoles={['super_admin']}><PlatformAdmin /></ProtectedRoute>} />
+      <Route path="/platform-admin/schools" element={<ProtectedRoute allowedRoles={['super_admin']}><PlatformAdmin /></ProtectedRoute>} />
 
       {/* Teacher routes */}
       <Route path="/teacher" element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'teacher']}><TeacherDashboard /></ProtectedRoute>} />
