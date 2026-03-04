@@ -2,7 +2,7 @@ import {
   Home, Users, GraduationCap, BookOpen, Calendar, BarChart3, Bell, Settings,
   MessageSquare, FileText, ClipboardList, ClipboardCheck, AlertTriangle,
   DollarSign, CalendarDays, Building2, Megaphone, LayoutDashboard, CreditCard,
-  Receipt, PieChart as PieChartIcon,
+  Receipt, PieChart as PieChartIcon, Shield,
 } from 'lucide-react';
 
 export const studentNavItems = [
@@ -81,6 +81,7 @@ export const adminNavItems = [
   { label: 'Statistiques', href: '/admin/stats', icon: <BarChart3 className="w-5 h-5" /> },
   { label: 'Annonces', href: '/admin/announcements', icon: <Bell className="w-5 h-5" /> },
   { label: 'Messages', href: '/messages', icon: <MessageSquare className="w-5 h-5" /> },
+  { label: 'Plateforme', href: '/platform-admin', icon: <Shield className="w-5 h-5" /> },
   { label: 'Paramètres', href: '/settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
