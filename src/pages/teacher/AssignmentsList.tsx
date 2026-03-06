@@ -2,46 +2,22 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Home,
-  BookOpen,
-  FileText,
-  ClipboardList,
-  BarChart3,
-  Users,
-  Calendar,
-  Plus,
-  Search,
-  Eye,
-  Edit,
-  Trash2,
-  MoreVertical,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
+  Home, BookOpen, FileText, ClipboardList, BarChart3, Users, Calendar,
+  Plus, Search, Eye, Edit, Trash2, MoreVertical, Clock, CheckCircle, Loader2,
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
@@ -63,16 +39,13 @@ interface Assignment {
   max_score: number | null;
   is_published: boolean;
   created_at: string;
-  courses: {
-    title: string;
-    classes: { name: string } | null;
-    subjects: { name: string } | null;
-  } | null;
+  courses: { title: string; classes: { name: string } | null; subjects: { name: string } | null; } | null;
   assignment_submissions: { id: string; status: string }[];
 }
 
 const AssignmentsList = () => {
   const { user } = useAuth();
+  const { currentSchool } = useSchool();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,23 +53,20 @@ const AssignmentsList = () => {
   const [assignmentToDelete, setAssignmentToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      fetchAssignments();
-    }
-  }, [user]);
+    if (user && currentSchool) fetchAssignments();
+  }, [user, currentSchool]);
 
   const fetchAssignments = async () => {
+    if (!currentSchool) return;
     try {
       const { data, error } = await supabase
         .from('assignments')
-        .select(`
-          id, title, description, due_date, max_score, is_published, created_at,
+        .select(`id, title, description, due_date, max_score, is_published, created_at,
           courses!inner(title, teacher_id, classes(name), subjects(name)),
-          assignment_submissions(id, status)
-        `)
+          assignment_submissions(id, status)`)
         .eq('courses.teacher_id', user?.id)
+        .eq('school_id', currentSchool.id)
         .order('due_date', { ascending: false });
-
       if (error) throw error;
       setAssignments(data || []);
     } catch (error) {
@@ -108,11 +78,9 @@ const AssignmentsList = () => {
 
   const handleDelete = async () => {
     if (!assignmentToDelete) return;
-
     try {
       const { error } = await supabase.from('assignments').delete().eq('id', assignmentToDelete);
       if (error) throw error;
-
       setAssignments(assignments.filter((a) => a.id !== assignmentToDelete));
       toast.success('Devoir supprimé avec succès');
     } catch (error) {
@@ -126,16 +94,9 @@ const AssignmentsList = () => {
 
   const togglePublish = async (assignmentId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('assignments')
-        .update({ is_published: !currentStatus })
-        .eq('id', assignmentId);
-
+      const { error } = await supabase.from('assignments').update({ is_published: !currentStatus }).eq('id', assignmentId);
       if (error) throw error;
-
-      setAssignments(
-        assignments.map((a) => (a.id === assignmentId ? { ...a, is_published: !currentStatus } : a))
-      );
+      setAssignments(assignments.map((a) => (a.id === assignmentId ? { ...a, is_published: !currentStatus } : a)));
       toast.success(currentStatus ? 'Devoir dépublié' : 'Devoir publié');
     } catch (error) {
       console.error('Error toggling publish:', error);
@@ -153,122 +114,60 @@ const AssignmentsList = () => {
     return { label: 'En cours', color: 'default' };
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
+  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 
-  const filteredAssignments = assignments.filter((assignment) =>
-    assignment.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAssignments = assignments.filter((a) => a.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <DashboardLayout navItems={navItems} title="Gestion des Devoirs">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="relative flex-1 sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher un devoir..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Input placeholder="Rechercher un devoir..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-          <Button asChild>
-            <Link to="/teacher/assignments/new">
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau devoir
-            </Link>
-          </Button>
+          <Button asChild><Link to="/teacher/assignments/new"><Plus className="w-4 h-4 mr-2" />Nouveau devoir</Link></Button>
         </div>
 
-        {/* Assignments Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
         ) : filteredAssignments.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredAssignments.map((assignment) => {
               const status = getStatus(assignment.due_date, assignment.is_published);
-              const submittedCount = assignment.assignment_submissions?.filter(
-                (s) => s.status === 'submitted' || s.status === 'graded'
-              ).length || 0;
-
+              const submittedCount = assignment.assignment_submissions?.filter(s => s.status === 'submitted' || s.status === 'graded').length || 0;
               return (
                 <Card key={assignment.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-flora-gold/20 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-amber-600" />
+                        <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-accent-foreground" />
                         </div>
                         <Badge variant={status.color as any}>{status.label}</Badge>
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="w-4 h-4" /></Button></DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/teacher/assignments/${assignment.id}`}>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Voir les soumissions
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link to={`/teacher/assignments/${assignment.id}/edit`}>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Modifier
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => togglePublish(assignment.id, assignment.is_published)}>
-                            {assignment.is_published ? 'Dépublier' : 'Publier'}
-                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild><Link to={`/teacher/assignments/${assignment.id}`}><Eye className="w-4 h-4 mr-2" />Voir les soumissions</Link></DropdownMenuItem>
+                          <DropdownMenuItem asChild><Link to={`/teacher/assignments/${assignment.id}/edit`}><Edit className="w-4 h-4 mr-2" />Modifier</Link></DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => togglePublish(assignment.id, assignment.is_published)}>{assignment.is_published ? 'Dépublier' : 'Publier'}</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              setAssignmentToDelete(assignment.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Supprimer
+                          <DropdownMenuItem className="text-destructive" onClick={() => { setAssignmentToDelete(assignment.id); setDeleteDialogOpen(true); }}>
+                            <Trash2 className="w-4 h-4 mr-2" />Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-
-                    <h3 className="font-semibold text-foreground line-clamp-2 mb-2">
-                      {assignment.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {assignment.courses?.classes?.name} • {assignment.courses?.subjects?.name}
-                    </p>
-
+                    <h3 className="font-semibold text-foreground line-clamp-2 mb-2">{assignment.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{assignment.courses?.classes?.name} • {assignment.courses?.subjects?.name}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{formatDate(assignment.due_date)}</span>
-                      </div>
-                      {assignment.max_score && (
-                        <span>/{assignment.max_score} pts</span>
-                      )}
+                      <div className="flex items-center gap-1"><Clock className="w-4 h-4" /><span>{formatDate(assignment.due_date)}</span></div>
+                      {assignment.max_score && <span>/{assignment.max_score} pts</span>}
                     </div>
-
                     <div className="flex items-center gap-2 pt-3 border-t">
-                      <CheckCircle className="w-4 h-4 text-flora-success" />
-                      <span className="text-sm">
-                        {submittedCount} soumission{submittedCount > 1 ? 's' : ''}
-                      </span>
+                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <span className="text-sm">{submittedCount} soumission{submittedCount > 1 ? 's' : ''}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -280,35 +179,22 @@ const AssignmentsList = () => {
             <CardContent className="py-12 text-center">
               <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
               <h3 className="font-medium text-lg mb-2">Aucun devoir trouvé</h3>
-              <p className="text-muted-foreground mb-4">
-                Créez votre premier devoir pour vos élèves
-              </p>
-              <Button asChild>
-                <Link to="/teacher/assignments/new">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Créer un devoir
-                </Link>
-              </Button>
+              <p className="text-muted-foreground mb-4">Créez votre premier devoir pour vos élèves</p>
+              <Button asChild><Link to="/teacher/assignments/new"><Plus className="w-4 h-4 mr-2" />Créer un devoir</Link></Button>
             </CardContent>
           </Card>
         )}
       </div>
 
-      {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer le devoir ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette action est irréversible. Le devoir et toutes les soumissions associées seront
-              définitivement supprimés.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Cette action est irréversible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Supprimer
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Supprimer</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
