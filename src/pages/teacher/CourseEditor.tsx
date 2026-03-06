@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import RichTextEditor from '@/components/editor/RichTextEditor';
 import { downloadPDF } from '@/utils/pdfGenerator';
@@ -11,33 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Home,
-  BookOpen,
-  FileText,
-  ClipboardList,
-  BarChart3,
-  Users,
-  Calendar,
-  Save,
-  Eye,
-  FileDown,
-  ArrowLeft,
-  Sparkles,
-  Loader2,
-  Download,
+  Home, BookOpen, FileText, ClipboardList, BarChart3, Users, Calendar,
+  Save, Eye, FileDown, ArrowLeft, Sparkles, Loader2, Download,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import AIPreparationModal from '@/components/course/AIPreparationModal';
@@ -52,22 +34,15 @@ const navItems = [
   { label: 'Emploi du temps', href: '/teacher/schedule', icon: <Calendar className="w-5 h-5" /> },
 ];
 
-interface SubjectOption {
-  id: string;
-  name: string;
-}
-
-interface ClassOption {
-  id: string;
-  name: string;
-  level: string;
-}
+interface SubjectOption { id: string; name: string; }
+interface ClassOption { id: string; name: string; level: string; }
 
 const CourseEditor = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { currentSchool } = useSchool();
   const isEditing = !!id;
 
   const [title, setTitle] = useState('');
@@ -84,26 +59,19 @@ const CourseEditor = () => {
   const [showAIModal, setShowAIModal] = useState(false);
 
   useEffect(() => {
-    fetchSubjectsAndClasses();
-    
-    // Check for AI-generated content in URL
+    if (currentSchool) fetchSubjectsAndClasses();
     const aiContent = searchParams.get('aiContent');
-    if (aiContent) {
-      setContent(decodeURIComponent(aiContent));
-    }
-    
-    if (isEditing) {
-      fetchCourse();
-    }
-  }, [id]);
+    if (aiContent) setContent(decodeURIComponent(aiContent));
+    if (isEditing) fetchCourse();
+  }, [id, currentSchool]);
 
   const fetchSubjectsAndClasses = async () => {
+    if (!currentSchool) return;
     try {
       const [subjectsRes, classesRes] = await Promise.all([
-        supabase.from('subjects').select('id, name').order('name'),
-        supabase.from('classes').select('id, name, level').order('name'),
+        supabase.from('subjects').select('id, name').eq('school_id', currentSchool.id).order('name'),
+        supabase.from('classes').select('id, name, level').eq('school_id', currentSchool.id).order('name'),
       ]);
-
       if (subjectsRes.data) setSubjects(subjectsRes.data);
       if (classesRes.data) setClasses(classesRes.data);
     } catch (error) {
@@ -115,12 +83,7 @@ const CourseEditor = () => {
     if (!id) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('id', id)
-        .single();
-
+      const { data, error } = await supabase.from('courses').select('*').eq('id', id).single();
       if (error) throw error;
       if (data) {
         setTitle(data.title);
@@ -158,23 +121,18 @@ const CourseEditor = () => {
         duration_minutes: parseInt(duration),
         is_published: publish,
         published_at: publish ? new Date().toISOString() : null,
+        school_id: currentSchool?.id || null,
       };
 
       if (isEditing) {
-        const { error } = await supabase
-          .from('courses')
-          .update(courseData)
-          .eq('id', id);
+        const { error } = await supabase.from('courses').update(courseData).eq('id', id);
         if (error) throw error;
         toast.success('Cours mis à jour avec succès');
       } else {
-        const { error } = await supabase
-          .from('courses')
-          .insert(courseData);
+        const { error } = await supabase.from('courses').insert(courseData);
         if (error) throw error;
         toast.success(publish ? 'Cours publié avec succès' : 'Brouillon enregistré');
       }
-
       navigate('/teacher/courses');
     } catch (error) {
       console.error('Error saving course:', error);
@@ -187,36 +145,26 @@ const CourseEditor = () => {
   const handleGeneratePDF = async () => {
     const selectedClass = classes.find(c => c.id === classId);
     const selectedSubject = subjects.find(s => s.id === subjectId);
-    
     await downloadPDF({
-      title,
-      content,
-      type: 'course',
-      className: selectedClass?.name || '',
-      level: selectedClass?.level || '',
+      title, content, type: 'course',
+      className: selectedClass?.name || '', level: selectedClass?.level || '',
       subject: selectedSubject?.name || '',
       teacherName: profile ? `${profile.first_name} ${profile.last_name}` : '',
-      schoolName: 'Groupe Scolaire Flora',
+      schoolName: currentSchool?.name || 'Établissement',
     });
-    
     toast.success('PDF généré avec succès');
   };
 
   const handleGenerateWord = async () => {
     const selectedClass = classes.find(c => c.id === classId);
     const selectedSubject = subjects.find(s => s.id === subjectId);
-    
     await downloadWord({
-      title,
-      content,
-      type: 'course',
-      className: selectedClass?.name || '',
-      level: selectedClass?.level || '',
+      title, content, type: 'course',
+      className: selectedClass?.name || '', level: selectedClass?.level || '',
       subject: selectedSubject?.name || '',
       teacherName: profile ? `${profile.first_name} ${profile.last_name}` : '',
-      schoolName: 'Groupe Scolaire Flora',
+      schoolName: currentSchool?.name || 'Établissement',
     });
-    
     toast.success('Document Word généré avec succès');
   };
 
@@ -225,9 +173,7 @@ const CourseEditor = () => {
   if (loading) {
     return (
       <DashboardLayout navItems={navItems} title={isEditing ? 'Modifier le cours' : 'Nouveau cours'}>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+        <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
       </DashboardLayout>
     );
   }
@@ -235,98 +181,52 @@ const CourseEditor = () => {
   return (
     <DashboardLayout navItems={navItems} title={isEditing ? 'Modifier le cours' : 'Nouveau cours'}>
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate('/teacher/courses')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
-          </Button>
+          <Button variant="ghost" onClick={() => navigate('/teacher/courses')}><ArrowLeft className="w-4 h-4 mr-2" />Retour</Button>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowAIModal(true)}>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Aide IA
-            </Button>
+            <Button variant="outline" onClick={() => setShowAIModal(true)}><Sparkles className="w-4 h-4 mr-2" />Aide IA</Button>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={!content}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Exporter
-                </Button>
-              </DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild><Button variant="outline" disabled={!content}><Download className="w-4 h-4 mr-2" />Exporter</Button></DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleGeneratePDF}>
-                  <FileDown className="w-4 h-4 mr-2" />
-                  Télécharger en PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleGenerateWord}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Télécharger en Word
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleGeneratePDF}><FileDown className="w-4 h-4 mr-2" />Télécharger en PDF</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleGenerateWord}><FileText className="w-4 h-4 mr-2" />Télécharger en Word</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
-        {/* Form */}
         <Card>
-          <CardHeader>
-            <CardTitle>Informations du cours</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Informations du cours</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Titre du cours *</Label>
-                <Input
-                  id="title"
-                  placeholder="Ex: Introduction aux équations"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
+                <Input id="title" placeholder="Ex: Introduction aux équations" value={title} onChange={(e) => setTitle(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="chapter">Chapitre</Label>
-                <Input
-                  id="chapter"
-                  placeholder="Ex: Chapitre 3"
-                  value={chapter}
-                  onChange={(e) => setChapter(e.target.value)}
-                />
+                <Input id="chapter" placeholder="Ex: Chapitre 3" value={chapter} onChange={(e) => setChapter(e.target.value)} />
               </div>
             </div>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Matière *</Label>
                 <Select value={subjectId} onValueChange={setSubjectId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjects.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                  <SelectContent>{subjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Classe *</Label>
                 <Select value={classId} onValueChange={setClassId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {classes.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                  <SelectContent>{classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Difficulté</Label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="beginner">Débutant</SelectItem>
                     <SelectItem value="intermediate">Intermédiaire</SelectItem>
@@ -336,49 +236,31 @@ const CourseEditor = () => {
               </div>
               <div className="space-y-2">
                 <Label>Durée (min)</Label>
-                <Input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  min="15"
-                  step="15"
-                />
+                <Input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} min="15" step="15" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Content Editor */}
         <Card>
-          <CardHeader>
-            <CardTitle>Contenu du cours</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RichTextEditor content={content} onChange={setContent} />
-          </CardContent>
+          <CardHeader><CardTitle>Contenu du cours</CardTitle></CardHeader>
+          <CardContent><RichTextEditor content={content} onChange={setContent} /></CardContent>
         </Card>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Enregistrer brouillon
+            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Enregistrer brouillon
           </Button>
           <Button onClick={() => handleSave(true)} disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Eye className="w-4 h-4 mr-2" />}
-            Publier
+            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Eye className="w-4 h-4 mr-2" />}Publier
           </Button>
         </div>
       </div>
 
-      {/* AI Modal */}
       <AIPreparationModal
-        isOpen={showAIModal}
-        onClose={() => setShowAIModal(false)}
+        isOpen={showAIModal} onClose={() => setShowAIModal(false)}
         onUseContent={(aiContent: string) => setContent(aiContent)}
-        subjects={subjects}
-        classes={classes}
-        teacherName={teacherName}
+        subjects={subjects} classes={classes} teacherName={teacherName}
       />
     </DashboardLayout>
   );
