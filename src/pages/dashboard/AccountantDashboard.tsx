@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSchool } from "@/contexts/SchoolContext";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,16 +49,19 @@ import {
 
 const AccountantDashboard = () => {
   const queryClient = useQueryClient();
+  const { currentSchool } = useSchool();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [isFeeDialogOpen, setIsFeeDialogOpen] = useState(false);
   const currentYear = "2024-2025";
+  const schoolId = currentSchool?.id;
 
   // Fetch classes
   const { data: classes = [] } = useQuery({
-    queryKey: ["classes"],
+    queryKey: ["classes", schoolId],
+    enabled: !!schoolId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("classes").select("*").order("name");
+      const { data, error } = await supabase.from("classes").select("*").eq("school_id", schoolId!).order("name");
       if (error) throw error;
       return data;
     },
@@ -65,16 +69,21 @@ const AccountantDashboard = () => {
 
   // Fetch students with their classes
   const { data: students = [] } = useQuery({
-    queryKey: ["students-for-payments"],
+    queryKey: ["students-for-payments", schoolId],
+    enabled: !!schoolId,
     queryFn: async () => {
+      const { data: members } = await supabase
+        .from("school_members")
+        .select("user_id")
+        .eq("school_id", schoolId!)
+        .eq("role", "student")
+        .eq("is_active", true);
+      if (!members || members.length === 0) return [];
+      const userIds = members.map(m => m.user_id);
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          user_roles!inner(role),
-          student_classes(class_id, classes(name))
-        `)
-        .eq("user_roles.role", "student");
+        .select("*, student_classes(class_id, classes(name))")
+        .in("id", userIds);
       if (error) throw error;
       return data;
     },
@@ -82,11 +91,13 @@ const AccountantDashboard = () => {
 
   // Fetch tuition fees
   const { data: tuitionFees = [] } = useQuery({
-    queryKey: ["tuition-fees"],
+    queryKey: ["tuition-fees", schoolId],
+    enabled: !!schoolId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tuition_fees")
         .select("*, classes(name)")
+        .eq("school_id", schoolId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -95,11 +106,13 @@ const AccountantDashboard = () => {
 
   // Fetch payments
   const { data: payments = [] } = useQuery({
-    queryKey: ["student-payments"],
+    queryKey: ["student-payments", schoolId],
+    enabled: !!schoolId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("student_payments")
         .select("*, profiles(first_name, last_name), tuition_fees(school_year, classes(name))")
+        .eq("school_id", schoolId!)
         .order("payment_date", { ascending: false });
       if (error) throw error;
       return data;
@@ -108,11 +121,13 @@ const AccountantDashboard = () => {
 
   // Fetch expenses
   const { data: expenses = [] } = useQuery({
-    queryKey: ["school-expenses"],
+    queryKey: ["school-expenses", schoolId],
+    enabled: !!schoolId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("school_expenses")
         .select("*")
+        .eq("school_id", schoolId!)
         .order("expense_date", { ascending: false });
       if (error) throw error;
       return data;
@@ -138,6 +153,7 @@ const AccountantDashboard = () => {
       const { error } = await supabase.from("student_payments").insert({
         ...payment,
         receipt_number: receiptNumber,
+        school_id: schoolId,
       });
       if (error) throw error;
     },
@@ -158,7 +174,7 @@ const AccountantDashboard = () => {
       description: string;
       amount: number;
     }) => {
-      const { error } = await supabase.from("school_expenses").insert(expense);
+      const { error } = await supabase.from("school_expenses").insert({ ...expense, school_id: schoolId });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -180,7 +196,7 @@ const AccountantDashboard = () => {
       tuition_fee: number;
       other_fees: number;
     }) => {
-      const { error } = await supabase.from("tuition_fees").insert(fee);
+      const { error } = await supabase.from("tuition_fees").insert({ ...fee, school_id: schoolId });
       if (error) throw error;
     },
     onSuccess: () => {
