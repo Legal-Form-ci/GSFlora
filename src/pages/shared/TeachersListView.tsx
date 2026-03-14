@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,21 +15,36 @@ interface Props {
 }
 
 const TeachersListView = ({ navItems, title = 'Liste des Enseignants' }: Props) => {
+  const { currentSchool } = useSchool();
   const [teachers, setTeachers] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTeachers();
-  }, []);
+    if (currentSchool) fetchTeachers();
+  }, [currentSchool]);
 
   const fetchTeachers = async () => {
+    if (!currentSchool) return;
     try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*, user_roles!inner(role), teacher_subjects(subjects(name))')
-        .eq('user_roles.role', 'teacher');
-      setTeachers(data || []);
+      const { data: members } = await supabase
+        .from('school_members')
+        .select('user_id')
+        .eq('school_id', currentSchool.id)
+        .eq('role', 'teacher')
+        .eq('is_active', true);
+
+      const teacherIds = members?.map(m => m.user_id) || [];
+
+      if (teacherIds.length > 0) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*, teacher_subjects(subjects(name))')
+          .in('id', teacherIds);
+        setTeachers(data || []);
+      } else {
+        setTeachers([]);
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {

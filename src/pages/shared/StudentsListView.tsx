@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const StudentsListView = ({ navItems, title = 'Liste des Élèves' }: Props) => {
+  const { currentSchool } = useSchool();
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClass, setSelectedClass] = useState('all');
@@ -22,19 +24,34 @@ const StudentsListView = ({ navItems, title = 'Liste des Élèves' }: Props) => 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (currentSchool) fetchData();
+  }, [currentSchool]);
 
   const fetchData = async () => {
+    if (!currentSchool) return;
     try {
-      const [studentsRes, classesRes] = await Promise.all([
-        supabase.from('profiles')
-          .select('*, user_roles!inner(role), student_classes(class_id, school_year, classes(name))')
-          .eq('user_roles.role', 'student'),
-        supabase.from('classes').select('id, name').order('name'),
-      ]);
-      setStudents(studentsRes.data || []);
-      setClasses(classesRes.data || []);
+      // Get students who are members of this school
+      const { data: members } = await supabase
+        .from('school_members')
+        .select('user_id')
+        .eq('school_id', currentSchool.id)
+        .eq('role', 'student')
+        .eq('is_active', true);
+
+      const studentIds = members?.map(m => m.user_id) || [];
+
+      if (studentIds.length > 0) {
+        const { data: studentsData } = await supabase
+          .from('profiles')
+          .select('*, student_classes(class_id, school_year, classes(name))')
+          .in('id', studentIds);
+        setStudents(studentsData || []);
+      } else {
+        setStudents([]);
+      }
+
+      const { data: classesData } = await supabase.from('classes').select('id, name').eq('school_id', currentSchool.id).order('name');
+      setClasses(classesData || []);
     } catch (error) {
       console.error('Error:', error);
     } finally {

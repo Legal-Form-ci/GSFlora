@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Calendar, Award, MessageSquare, ClipboardList, Users, BarChart3 } from 'lucide-react';
+import { Home, BookOpen, Calendar, Award, MessageSquare, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useSchool } from '@/contexts/SchoolContext';
 
 interface TabItem {
   label: string;
@@ -25,6 +27,8 @@ const parentTabs: TabItem[] = [
   { label: 'Messages', href: '/messages', icon: MessageSquare },
 ];
 
+const GLOBAL_PATHS = ['/messages', '/profile', '/settings'];
+
 interface BottomTabBarProps {
   role: 'student' | 'parent';
 }
@@ -32,15 +36,24 @@ interface BottomTabBarProps {
 const BottomTabBar = ({ role }: BottomTabBarProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
-
-  if (!isMobile) return null;
+  const { currentSchool } = useSchool();
 
   const tabs = role === 'student' ? studentTabs : parentTabs;
+
+  const slugTabs = useMemo(() => {
+    if (!currentSchool?.slug) return tabs;
+    return tabs.map(tab => {
+      if (GLOBAL_PATHS.some(p => tab.href === p)) return tab;
+      return { ...tab, href: `/${currentSchool.slug}${tab.href}` };
+    });
+  }, [tabs, currentSchool?.slug]);
+
+  if (!isMobile) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border shadow-lg safe-area-bottom">
       <div className="flex items-center justify-around h-16 px-1">
-        {tabs.map((tab) => {
+        {slugTabs.map((tab) => {
           const isActive = location.pathname === tab.href;
           const Icon = tab.icon;
           return (
@@ -49,21 +62,14 @@ const BottomTabBar = ({ role }: BottomTabBarProps) => {
               to={tab.href}
               className={cn(
                 'flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-lg transition-colors min-w-0',
-                isActive
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
+                isActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               <Icon className={cn('w-5 h-5 mb-0.5', isActive && 'text-primary')} />
-              <span className={cn(
-                'text-[10px] font-medium truncate',
-                isActive && 'font-semibold'
-              )}>
+              <span className={cn('text-[10px] font-medium truncate', isActive && 'font-semibold')}>
                 {tab.label}
               </span>
-              {isActive && (
-                <div className="absolute bottom-1 w-5 h-0.5 bg-primary rounded-full" />
-              )}
+              {isActive && <div className="absolute bottom-1 w-5 h-0.5 bg-primary rounded-full" />}
             </Link>
           );
         })}

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { BookOpen, Loader2 } from 'lucide-react';
 
 interface Props {
   navItems: { label: string; href: string; icon: React.ReactNode }[];
@@ -13,24 +14,27 @@ interface Props {
 }
 
 const CurriculumView = ({ navItems, title = 'Suivi des Programmes' }: Props) => {
+  const { currentSchool } = useSchool();
   const [courses, setCourses] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClass, setSelectedClass] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, [selectedClass]);
+    if (currentSchool) fetchData();
+  }, [selectedClass, currentSchool]);
 
   const fetchData = async () => {
+    if (!currentSchool) return;
     setLoading(true);
     try {
-      const { data: classesData } = await supabase.from('classes').select('id, name').order('name');
+      const { data: classesData } = await supabase.from('classes').select('id, name').eq('school_id', currentSchool.id).order('name');
       setClasses(classesData || []);
 
       let query = supabase.from('courses')
         .select('*, subjects(name), classes(name), profiles!courses_teacher_id_fkey(first_name, last_name)')
-        .order('subjects(name)');
+        .eq('school_id', currentSchool.id)
+        .order('title');
 
       if (selectedClass !== 'all') query = query.eq('class_id', selectedClass);
 
@@ -47,7 +51,6 @@ const CurriculumView = ({ navItems, title = 'Suivi des Programmes' }: Props) => 
   const publishedCourses = courses.filter(c => c.is_published).length;
   const publishRate = totalCourses > 0 ? (publishedCourses / totalCourses) * 100 : 0;
 
-  // Group by subject
   const bySubject: Record<string, { total: number; published: number }> = {};
   courses.forEach(c => {
     const s = c.subjects?.name || 'Autre';
@@ -71,7 +74,7 @@ const CurriculumView = ({ navItems, title = 'Suivi des Programmes' }: Props) => 
           </Select>
           <div className="flex gap-4 text-sm">
             <span className="text-muted-foreground">{totalCourses} cours total</span>
-            <span className="text-flora-success">{publishedCourses} publiés</span>
+            <span className="text-emerald-600">{publishedCourses} publiés</span>
             <span className="text-amber-600">{totalCourses - publishedCourses} brouillons</span>
           </div>
         </div>

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSchool } from '@/contexts/SchoolContext';
 import {
   Settings,
   LogOut,
@@ -41,12 +42,27 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) => {
   const { profile, role, signOut } = useAuth();
+  const { currentSchool } = useSchool();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const isMobile = useIsMobile();
   const showBottomNav = isMobile && (role === 'student' || role === 'parent');
+
+  const GLOBAL_PATHS = ['/messages', '/profile', '/settings', '/change-password', '/platform-admin', '/create-school'];
+
+  // Auto-prefix nav items with school slug
+  const slugNavItems = useMemo(() => {
+    if (!currentSchool?.slug) return navItems;
+    const slug = currentSchool.slug;
+    return navItems.map(item => {
+      if (GLOBAL_PATHS.some(p => item.href === p || item.href.startsWith(p + '/'))) return item;
+      // Already prefixed
+      if (item.href.startsWith(`/${slug}/`)) return item;
+      return { ...item, href: `/${slug}${item.href}` };
+    });
+  }, [navItems, currentSchool?.slug]);
 
   // Map role to guide type
   const getGuideRole = () => {
@@ -112,8 +128,8 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.href;
+            {slugNavItems.map((item) => {
+              const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
               return (
                 <Link
                   key={item.href}

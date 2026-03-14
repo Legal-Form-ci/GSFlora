@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,18 +12,21 @@ interface Props {
 }
 
 const AnnouncementsView = ({ navItems, title = 'Annonces' }: Props) => {
+  const { currentSchool } = useSchool();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, []);
+    if (currentSchool) fetchAnnouncements();
+  }, [currentSchool]);
 
   const fetchAnnouncements = async () => {
+    if (!currentSchool) return;
     try {
       const { data } = await supabase
         .from('announcements')
         .select('*, profiles!announcements_author_id_fkey(first_name, last_name)')
+        .eq('school_id', currentSchool.id)
         .order('created_at', { ascending: false });
       setAnnouncements(data || []);
     } catch (error) {
