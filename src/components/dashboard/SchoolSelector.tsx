@@ -1,4 +1,6 @@
 import { useSchool } from '@/contexts/SchoolContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Building2, ChevronDown, Check } from 'lucide-react';
 import {
   DropdownMenu,
@@ -9,10 +11,32 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+const roleToPath: Record<string, string> = {
+  super_admin: 'admin',
+  admin: 'admin',
+  founder: 'founder',
+  director: 'director',
+  censor: 'censor',
+  educator: 'educator',
+  principal_teacher: 'principal-teacher',
+  teacher: 'teacher',
+  student: 'student',
+  parent: 'parent',
+};
+
 const SchoolSelector = () => {
   const { currentSchool, userSchools, setCurrentSchool, loading } = useSchool();
+  const { role } = useAuth();
+  const navigate = useNavigate();
 
   if (loading || userSchools.length <= 1) return null;
+
+  const handleSwitch = (school: typeof currentSchool) => {
+    if (!school) return;
+    setCurrentSchool(school);
+    const rolePath = role ? roleToPath[role] || 'admin' : 'admin';
+    navigate(`/${school.slug}/${rolePath}`);
+  };
 
   return (
     <DropdownMenu>
@@ -27,7 +51,7 @@ const SchoolSelector = () => {
         {userSchools.map((school) => (
           <DropdownMenuItem
             key={school.id}
-            onClick={() => setCurrentSchool(school)}
+            onClick={() => handleSwitch(school)}
             className={cn('gap-2', currentSchool?.id === school.id && 'bg-accent')}
           >
             <Building2 className="w-4 h-4 shrink-0" />
