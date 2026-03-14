@@ -42,12 +42,27 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) => {
   const { profile, role, signOut } = useAuth();
+  const { currentSchool } = useSchool();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const isMobile = useIsMobile();
   const showBottomNav = isMobile && (role === 'student' || role === 'parent');
+
+  const GLOBAL_PATHS = ['/messages', '/profile', '/settings', '/change-password', '/platform-admin', '/create-school'];
+
+  // Auto-prefix nav items with school slug
+  const slugNavItems = useMemo(() => {
+    if (!currentSchool?.slug) return navItems;
+    const slug = currentSchool.slug;
+    return navItems.map(item => {
+      if (GLOBAL_PATHS.some(p => item.href === p || item.href.startsWith(p + '/'))) return item;
+      // Already prefixed
+      if (item.href.startsWith(`/${slug}/`)) return item;
+      return { ...item, href: `/${slug}${item.href}` };
+    });
+  }, [navItems, currentSchool?.slug]);
 
   // Map role to guide type
   const getGuideRole = () => {
