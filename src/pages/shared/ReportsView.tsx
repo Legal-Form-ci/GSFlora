@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const ReportsView = ({ navItems, title = 'Rapports & Analyses' }: Props) => {
+  const { currentSchool } = useSchool();
   const [loading, setLoading] = useState(true);
   const [selectedClass, setSelectedClass] = useState('all');
   const [classes, setClasses] = useState<any[]>([]);
@@ -22,25 +24,27 @@ const ReportsView = ({ navItems, title = 'Rapports & Analyses' }: Props) => {
   });
 
   useEffect(() => {
-    fetchData();
-  }, [selectedClass]);
+    if (currentSchool) fetchData();
+  }, [selectedClass, currentSchool]);
 
   const fetchData = async () => {
+    if (!currentSchool) return;
     setLoading(true);
     try {
-      const { data: classesData } = await supabase.from('classes').select('id, name').order('name');
+      const schoolId = currentSchool.id;
+      const { data: classesData } = await supabase.from('classes').select('id, name').eq('school_id', schoolId).order('name');
       setClasses(classesData || []);
 
-      const { data: grades } = await supabase.from('grades').select('score, max_score');
-      const { data: attendance } = await supabase.from('attendance').select('status');
-      const { count: studentCount } = await supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'student');
-      const { count: courseCount } = await supabase.from('courses').select('*', { count: 'exact', head: true });
-      const { count: publishedCount } = await supabase.from('courses').select('*', { count: 'exact', head: true }).eq('is_published', true);
+      const { data: grades } = await supabase.from('grades').select('score, max_score').eq('school_id', schoolId);
+      const { data: attendance } = await supabase.from('attendance').select('status').eq('school_id', schoolId);
+      const { count: studentCount } = await supabase.from('school_members').select('*', { count: 'exact', head: true }).eq('school_id', schoolId).eq('role', 'student').eq('is_active', true);
+      const { count: courseCount } = await supabase.from('courses').select('*', { count: 'exact', head: true }).eq('school_id', schoolId);
+      const { count: publishedCount } = await supabase.from('courses').select('*', { count: 'exact', head: true }).eq('school_id', schoolId).eq('is_published', true);
 
-      const avgGrade = grades?.length ? grades.reduce((s, g) => s + (g.score / g.max_score) * 20, 0) / grades.length : 0;
+      const avgGrade = grades?.length ? grades.reduce((s, g) => s + (g.score / (g.max_score || 20)) * 20, 0) / grades.length : 0;
       const presentCount = attendance?.filter(a => a.status === 'present').length || 0;
       const attendanceRate = attendance?.length ? (presentCount / attendance.length) * 100 : 0;
-      const passCount = grades?.filter(g => (g.score / g.max_score) >= 0.5).length || 0;
+      const passCount = grades?.filter(g => (g.score / (g.max_score || 20)) >= 0.5).length || 0;
       const passRate = grades?.length ? (passCount / grades.length) * 100 : 0;
 
       setStats({
@@ -82,8 +86,8 @@ const ReportsView = ({ navItems, title = 'Rapports & Analyses' }: Props) => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stats.avgGrade >= 10 ? 'bg-flora-success/20' : 'bg-destructive/20'}`}>
-                      {stats.avgGrade >= 10 ? <TrendingUp className="w-6 h-6 text-flora-success" /> : <TrendingDown className="w-6 h-6 text-destructive" />}
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stats.avgGrade >= 10 ? 'bg-emerald-500/20' : 'bg-destructive/20'}`}>
+                      {stats.avgGrade >= 10 ? <TrendingUp className="w-6 h-6 text-emerald-600" /> : <TrendingDown className="w-6 h-6 text-destructive" />}
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Moyenne générale</p>
@@ -108,7 +112,7 @@ const ReportsView = ({ navItems, title = 'Rapports & Analyses' }: Props) => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-flora-gold/20 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
                       <BarChart3 className="w-6 h-6 text-amber-600" />
                     </div>
                     <div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,30 +15,31 @@ interface Props {
 }
 
 const ScheduleView = ({ navItems, title = 'Emploi du Temps' }: Props) => {
+  const { currentSchool } = useSchool();
   const [schedule, setSchedule] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClass, setSelectedClass] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, [selectedClass]);
+    if (currentSchool) fetchData();
+  }, [selectedClass, currentSchool]);
 
   const fetchData = async () => {
+    if (!currentSchool) return;
     setLoading(true);
     try {
-      const { data: classesData } = await supabase.from('classes').select('id, name').order('name');
+      const { data: classesData } = await supabase.from('classes').select('id, name').eq('school_id', currentSchool.id).order('name');
       setClasses(classesData || []);
 
       let query = supabase
         .from('schedules')
         .select('*, courses(title, subjects(name), profiles!courses_teacher_id_fkey(first_name, last_name)), classes(name)')
+        .eq('school_id', currentSchool.id)
         .order('day_of_week')
         .order('start_time');
 
-      if (selectedClass !== 'all') {
-        query = query.eq('class_id', selectedClass);
-      }
+      if (selectedClass !== 'all') query = query.eq('class_id', selectedClass);
 
       const { data } = await query;
       setSchedule(data || []);
