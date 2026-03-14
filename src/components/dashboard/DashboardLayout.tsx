@@ -128,8 +128,8 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.href;
+            {slugNavItems.map((item) => {
+              const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
               return (
                 <Link
                   key={item.href}
