@@ -1,122 +1,127 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* GS FLORA DIGITAL Design System
-   Inspired by the school's branding: Deep Blue, Coral Pink, Golden Yellow
+/* SchoolHub Pro Design System
+   New brand identity: Forest Green, Sky Blue, Warm Gold
+   Inspired by the open book + lightning bolt logo
 */
 
 @layer base {
   :root {
     /* Main backgrounds */
-    --background: 45 30% 98%;
-    --foreground: 215 60% 15%;
+    --background: 150 25% 99%;
+    --foreground: 155 40% 12%;
 
     /* Cards and surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 215 60% 15%;
+    --card-foreground: 155 40% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 60% 15%;
+    --popover-foreground: 155 40% 12%;
 
-    /* Primary: Deep Flora Blue */
-    --primary: 215 70% 25%;
-    --primary-foreground: 45 30% 98%;
+    /* Primary: Forest Green (SchoolHub) */
+    --primary: 150 65% 28%;
+    --primary-foreground: 150 25% 99%;
 
-    /* Secondary: Warm Coral */
-    --secondary: 5 65% 70%;
-    --secondary-foreground: 215 60% 15%;
+    /* Secondary: Sky Blue lightning */
+    --secondary: 210 75% 55%;
+    --secondary-foreground: 0 0% 100%;
 
     /* Muted tones */
-    --muted: 45 20% 92%;
-    --muted-foreground: 215 25% 45%;
+    --muted: 150 18% 95%;
+    --muted-foreground: 155 15% 40%;
 
-    /* Accent: Golden Yellow */
-    --accent: 45 90% 55%;
-    --accent-foreground: 215 60% 15%;
+    /* Accent: Warm Gold */
+    --accent: 42 85% 55%;
+    --accent-foreground: 155 40% 12%;
 
     /* Destructive */
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 215 25% 85%;
-    --input: 215 25% 88%;
-    --ring: 215 70% 35%;
+    --border: 150 20% 88%;
+    --input: 150 20% 90%;
+    --ring: 150 65% 32%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom Flora colors */
-    --flora-blue: 215 70% 25%;
-    --flora-blue-light: 215 60% 45%;
-    --flora-coral: 5 65% 70%;
-    --flora-coral-dark: 5 55% 55%;
-    --flora-gold: 45 90% 55%;
-    --flora-gold-light: 45 85% 70%;
-    --flora-cream: 45 30% 95%;
-    --flora-success: 145 65% 40%;
+    /* Brand tokens (kept "flora-*" names for backward compat) */
+    --flora-blue: 210 75% 55%;
+    --flora-blue-light: 210 80% 70%;
+    --flora-coral: 14 85% 62%;
+    --flora-coral-dark: 14 70% 50%;
+    --flora-gold: 42 85% 55%;
+    --flora-gold-light: 42 90% 70%;
+    --flora-cream: 45 50% 96%;
+    --flora-success: 150 65% 38%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(215 70% 25%) 0%, hsl(215 60% 40%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45 90% 55%) 0%, hsl(35 85% 50%) 100%);
-    --gradient-coral: linear-gradient(135deg, hsl(5 65% 70%) 0%, hsl(15 60% 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(215 70% 20%) 0%, hsl(215 50% 35%) 50%, hsl(5 45% 45%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(150 65% 28%) 0%, hsl(150 55% 40%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(42 85% 55%) 0%, hsl(35 85% 50%) 100%);
+    --gradient-coral: linear-gradient(135deg, hsl(14 85% 62%) 0%, hsl(20 80% 55%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(150 65% 20%) 0%, hsl(155 55% 30%) 45%, hsl(210 65% 35%) 100%);
+    --gradient-mesh: radial-gradient(at 20% 20%, hsl(150 65% 35% / 0.45) 0px, transparent 50%),
+                     radial-gradient(at 80% 10%, hsl(210 80% 55% / 0.35) 0px, transparent 50%),
+                     radial-gradient(at 60% 90%, hsl(42 90% 60% / 0.35) 0px, transparent 50%);
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(215 70% 25% / 0.15);
-    --shadow-medium: 0 8px 30px -8px hsl(215 70% 25% / 0.2);
-    --shadow-strong: 0 16px 50px -12px hsl(215 70% 25% / 0.3);
+    --shadow-soft: 0 4px 20px -4px hsl(150 65% 28% / 0.12);
+    --shadow-medium: 0 8px 30px -8px hsl(150 65% 28% / 0.18);
+    --shadow-strong: 0 20px 60px -12px hsl(150 65% 28% / 0.28);
+    --shadow-glow: 0 0 40px hsl(42 90% 60% / 0.35);
 
     /* Sidebar */
-    --sidebar-background: 215 70% 22%;
-    --sidebar-foreground: 45 30% 95%;
-    --sidebar-primary: 45 90% 55%;
-    --sidebar-primary-foreground: 215 60% 15%;
-    --sidebar-accent: 215 60% 30%;
-    --sidebar-accent-foreground: 45 30% 95%;
-    --sidebar-border: 215 50% 35%;
-    --sidebar-ring: 45 90% 55%;
+    --sidebar-background: 150 60% 14%;
+    --sidebar-foreground: 150 25% 95%;
+    --sidebar-primary: 42 85% 55%;
+    --sidebar-primary-foreground: 155 50% 12%;
+    --sidebar-accent: 150 50% 22%;
+    --sidebar-accent-foreground: 150 25% 95%;
+    --sidebar-border: 150 40% 25%;
+    --sidebar-ring: 42 85% 55%;
   }
 
   .dark {
-    --background: 215 60% 8%;
-    --foreground: 45 30% 95%;
+    --background: 155 40% 7%;
+    --foreground: 150 25% 95%;
 
-    --card: 215 55% 12%;
-    --card-foreground: 45 30% 95%;
+    --card: 155 35% 11%;
+    --card-foreground: 150 25% 95%;
 
-    --popover: 215 55% 12%;
-    --popover-foreground: 45 30% 95%;
+    --popover: 155 35% 11%;
+    --popover-foreground: 150 25% 95%;
 
-    --primary: 45 90% 55%;
-    --primary-foreground: 215 60% 15%;
+    --primary: 42 85% 55%;
+    --primary-foreground: 155 50% 12%;
 
-    --secondary: 5 50% 40%;
-    --secondary-foreground: 45 30% 95%;
+    --secondary: 210 70% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 215 40% 18%;
-    --muted-foreground: 45 20% 65%;
+    --muted: 155 25% 18%;
+    --muted-foreground: 150 15% 70%;
 
-    --accent: 215 50% 25%;
-    --accent-foreground: 45 30% 95%;
+    --accent: 150 55% 25%;
+    --accent-foreground: 150 25% 95%;
 
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 40% 22%;
-    --input: 215 40% 22%;
-    --ring: 45 90% 55%;
+    --border: 155 25% 22%;
+    --input: 155 25% 22%;
+    --ring: 42 85% 55%;
 
-    --sidebar-background: 215 60% 10%;
-    --sidebar-foreground: 45 30% 95%;
-    --sidebar-primary: 45 90% 55%;
-    --sidebar-primary-foreground: 215 60% 15%;
-    --sidebar-accent: 215 50% 18%;
-    --sidebar-accent-foreground: 45 30% 95%;
-    --sidebar-border: 215 40% 22%;
-    --sidebar-ring: 45 90% 55%;
+    --sidebar-background: 155 40% 9%;
+    --sidebar-foreground: 150 25% 95%;
+    --sidebar-primary: 42 85% 55%;
+    --sidebar-primary-foreground: 155 50% 12%;
+    --sidebar-accent: 155 30% 16%;
+    --sidebar-accent-foreground: 150 25% 95%;
+    --sidebar-border: 155 25% 22%;
+    --sidebar-ring: 42 85% 55%;
   }
 }
 
@@ -127,11 +132,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -162,6 +168,14 @@
     background: var(--gradient-accent);
   }
 
+  .bg-gradient-mesh {
+    background-image: var(--gradient-mesh);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
   .shadow-flora {
     box-shadow: var(--shadow-soft);
   }
@@ -189,6 +203,34 @@
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
   }
+
+  .animate-blob {
+    animation: blob 18s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin 22s linear infinite;
+  }
+
+  .animate-tilt {
+    animation: tilt 10s ease-in-out infinite;
+  }
+
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .mask-fade {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
 }
 
 @keyframes float {
@@ -215,4 +257,20 @@
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.1); }
+  66% { transform: translate(-25px, 25px) scale(0.95); }
+}
+
+@keyframes tilt {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }

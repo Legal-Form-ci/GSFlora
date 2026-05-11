@@ -9,8 +9,8 @@ import {
   ChevronDown,
   UserCircle,
   HelpCircle,
-  Building2,
 } from 'lucide-react';
+import Logo from '@/components/Logo';
 import BottomTabBar from '@/components/mobile/BottomTabBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -114,14 +114,14 @@ const DashboardLayout = ({ children, navItems, title }: DashboardLayoutProps) =>
           {/* Logo */}
            <div className="p-4 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-sidebar-primary rounded-xl flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-sidebar-primary-foreground" />
+              <div className="bg-white rounded-xl p-2 shadow-md">
+                <Logo className="h-7" />
               </div>
               <div>
-                <h1 className="font-display text-lg font-bold text-sidebar-foreground">
-                  SchoolHub Pro
+                <h1 className="font-display text-base font-bold text-sidebar-foreground">
+                  SchoolHub <span className="text-accent">Pro</span>
                 </h1>
-                <p className="text-xs text-sidebar-foreground/60">Plateforme</p>
+                <p className="text-[10px] text-sidebar-foreground/60 -mt-0.5">digitaliser · gérer · grandir</p>
               </div>
             </Link>
           </div>
