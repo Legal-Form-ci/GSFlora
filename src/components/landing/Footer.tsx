@@ -1,51 +1,64 @@
-import { Building2 } from "lucide-react";
+import Logo from "@/components/Logo";
+import { Mail, Phone, MapPin, Twitter, Linkedin, Facebook, Youtube } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground py-12">
+    <footer className="bg-sidebar text-sidebar-foreground pt-16 pb-8 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-mesh opacity-10" />
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12 relative">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
-                <Building2 className="w-7 h-7 text-accent-foreground" />
-              </div>
-              <div>
-                <h3 className="font-display text-xl font-bold">SchoolHub Pro</h3>
-                <p className="text-sm text-primary-foreground/70">Plateforme éducative SaaS</p>
-              </div>
+            <div className="bg-white rounded-2xl p-3 inline-block mb-5">
+              <Logo className="h-10" />
             </div>
-            <p className="text-primary-foreground/70 max-w-md mb-4">
-              La plateforme de gestion scolaire multi-établissement la plus complète. 
-              Digitalisez votre école en quelques minutes.
+            <p className="text-sidebar-foreground/70 max-w-md mb-6 text-sm leading-relaxed">
+              SchoolHub Pro — la plateforme SaaS qui digitalise, gère et fait
+              grandir les établissements scolaires. Multi-tenant, sécurisée, et
+              déployée en 48h.
             </p>
+            <div className="flex gap-2">
+              {[Twitter, Linkedin, Facebook, Youtube].map((Icon, i) => (
+                <a key={i} href="#" className="w-9 h-9 rounded-full bg-sidebar-accent hover:bg-accent hover:text-accent-foreground transition-colors flex items-center justify-center">
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Plateforme</h4>
-            <ul className="space-y-2">
-              <li><a href="#features" className="text-primary-foreground/70 hover:text-accent transition-colors">Fonctionnalités</a></li>
-              <li><a href="#roles" className="text-primary-foreground/70 hover:text-accent transition-colors">Pour qui ?</a></li>
-              <li><a href="#pricing" className="text-primary-foreground/70 hover:text-accent transition-colors">Tarifs</a></li>
-              <li><a href="#contact" className="text-primary-foreground/70 hover:text-accent transition-colors">Contact</a></li>
+            <h4 className="font-semibold mb-4 text-sidebar-foreground">Écosystème</h4>
+            <ul className="space-y-2.5 text-sm">
+              {[
+                ["Fonctionnalités", "#features"],
+                ["Solutions par rôle", "#roles"],
+                ["Plateforme", "#platform"],
+                ["Tarifs", "#pricing"],
+                ["Roadmap", "#"],
+              ].map(([l, h]) => (
+                <li key={l}><a href={h} className="text-sidebar-foreground/70 hover:text-accent transition-colors">{l}</a></li>
+              ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Ressources</h4>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">Documentation</a></li>
-              <li><a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">Support</a></li>
-              <li><a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">Confidentialité</a></li>
-              <li><a href="#" className="text-primary-foreground/70 hover:text-accent transition-colors">Conditions</a></li>
+            <h4 className="font-semibold mb-4 text-sidebar-foreground">Contact</h4>
+            <ul className="space-y-2.5 text-sm text-sidebar-foreground/70">
+              <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-accent" /> contact@schoolhub.pro</li>
+              <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-accent" /> +221 33 800 00 00</li>
+              <li className="flex items-start gap-2"><MapPin className="w-4 h-4 text-accent mt-0.5" /> Dakar · Abidjan · Paris</li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-primary-foreground/70 text-sm">
-            © {new Date().getFullYear()} SchoolHub Pro. Tous droits réservés.
+        <div className="border-t border-sidebar-border pt-6 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+          <p className="text-sidebar-foreground/60 text-xs">
+            © {new Date().getFullYear()} SchoolHub Pro · digitaliser. gérer. grandir.
           </p>
+          <div className="flex gap-6 text-xs text-sidebar-foreground/60">
+            <a href="#" className="hover:text-accent transition-colors">Confidentialité</a>
+            <a href="#" className="hover:text-accent transition-colors">CGU</a>
+            <a href="#" className="hover:text-accent transition-colors">Mentions légales</a>
+          </div>
         </div>
       </div>
     </footer>
