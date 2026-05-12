@@ -1,6 +1,8 @@
-import { ArrowRight, Sparkles, Play, GraduationCap, BookOpen, Calendar, Wallet, Users, MessageSquare, Bell, BarChart3, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Sparkles, Play, CheckCircle2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
+import heroVideo from "@/assets/hero-school-video.mp4.asset.json";
 
 const rotatingWords = [
   "Inscriptions en ligne",
@@ -97,7 +99,7 @@ const HeroSection = () => {
 
           {/* Right – animated dashboard hero (Nexora-inspired) */}
           <div className="lg:col-span-6 relative">
-            <HeroAnimation />
+            <HeroVideo />
           </div>
         </div>
       </div>
@@ -125,106 +127,84 @@ const HeroSection = () => {
   );
 };
 
-/* ---------------- HeroAnimation: layered, dynamic dashboard mockup ---------------- */
-const HeroAnimation = () => {
-  const widgets = [
-    { icon: GraduationCap, label: "1 247", sub: "Élèves actifs", color: "text-primary", bg: "bg-primary/10" },
-    { icon: BookOpen, label: "86", sub: "Cours en ligne", color: "text-secondary", bg: "bg-secondary/10" },
-    { icon: Calendar, label: "98%", sub: "Présence", color: "text-flora-success", bg: "bg-flora-success/10" },
-    { icon: Wallet, label: "12.4M", sub: "Recettes (FCFA)", color: "text-accent", bg: "bg-accent/10" },
-  ];
+/* ---------------- HeroVideo: real MP4 with floating UI overlay ---------------- */
+const HeroVideo = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !videoRef.current.muted;
+    setMuted(videoRef.current.muted);
+  };
 
   return (
-    <div className="relative mx-auto max-w-xl aspect-square">
-      {/* Floating decorative shapes */}
-      <div className="absolute inset-0 animate-spin-slow opacity-60">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-accent rounded-full" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-secondary rounded-full" />
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rounded-full" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-accent rounded-full" />
-      </div>
+    <div className="relative mx-auto w-full max-w-2xl">
+      <div className="absolute -inset-4 bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/30 rounded-[2rem] blur-2xl opacity-60 animate-pulse-soft" />
 
-      {/* Main "browser" panel */}
-      <div className="absolute inset-6 bg-card rounded-3xl shadow-flora-lg border border-border overflow-hidden animate-tilt">
-        <div className="h-8 bg-muted/50 border-b border-border flex items-center gap-1.5 px-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-destructive/60" />
-          <span className="w-2.5 h-2.5 rounded-full bg-accent" />
-          <span className="w-2.5 h-2.5 rounded-full bg-flora-success" />
-          <span className="ml-3 text-[10px] text-muted-foreground font-mono">schoolhub.app/gs-flora/admin</span>
-        </div>
+      <div className="relative aspect-video rounded-3xl overflow-hidden shadow-flora-lg border border-border bg-card">
+        <video
+          ref={videoRef}
+          src={heroVideo.url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-secondary/20" />
 
-        <div className="p-4 space-y-3">
-          {/* KPI grid */}
-          <div className="grid grid-cols-2 gap-2">
-            {widgets.map((w, i) => (
-              <div
-                key={w.sub}
-                className="rounded-xl border border-border p-3 bg-background hover:border-primary/40 transition-colors animate-slide-up"
-                style={{ animationDelay: `${0.2 + i * 0.1}s`, animationFillMode: "both" }}
-              >
-                <div className={`w-8 h-8 rounded-lg ${w.bg} ${w.color} flex items-center justify-center mb-2`}>
-                  <w.icon className="w-4 h-4" />
-                </div>
-                <p className="text-lg font-bold font-display text-foreground leading-none">{w.label}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">{w.sub}</p>
-              </div>
-            ))}
+        {/* Mute button */}
+        <button
+          onClick={toggleMute}
+          aria-label={muted ? "Activer le son" : "Couper le son"}
+          className="absolute bottom-3 right-3 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-md border border-border hover:bg-background transition-colors flex items-center justify-center"
+        >
+          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+
+        {/* Live KPI overlay (top-left) */}
+        <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-md rounded-xl border border-border px-3 py-2 shadow-flora animate-slide-up">
+          <div className="flex items-center gap-2">
+            <span className="relative flex w-2 h-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-flora-success opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-flora-success" />
+            </span>
+            <span className="text-[10px] font-semibold text-foreground uppercase tracking-wide">En direct</span>
           </div>
-
-          {/* Chart */}
-          <div className="rounded-xl border border-border p-3 bg-background">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <BarChart3 className="w-3.5 h-3.5 text-primary" /> Performance
-              </p>
-              <span className="text-[10px] text-flora-success font-semibold">+18%</span>
-            </div>
-            <div className="flex items-end gap-1.5 h-16">
-              {[40, 65, 50, 80, 60, 90, 75, 95, 70, 85, 100, 88].map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 bg-gradient-to-t from-primary to-secondary rounded-t animate-slide-up"
-                  style={{ height: `${h}%`, animationDelay: `${0.5 + i * 0.05}s`, animationFillMode: "both" }}
-                />
-              ))}
-            </div>
-          </div>
+          <p className="text-sm font-bold font-display text-foreground mt-1">1 247 élèves connectés</p>
         </div>
       </div>
 
-      {/* Floating cards */}
-      <div className="absolute -top-2 -left-4 bg-card rounded-2xl shadow-flora-lg border border-border p-3 animate-float max-w-[180px]">
+      {/* Floating glass cards */}
+      <div className="absolute -top-4 -right-3 md:-right-8 bg-card/95 backdrop-blur-md rounded-2xl shadow-flora-lg border border-border p-3 animate-float max-w-[200px]">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
-            <MessageSquare className="w-4 h-4" />
-          </div>
+          <div className="w-9 h-9 rounded-lg bg-flora-success/10 text-flora-success flex items-center justify-center text-lg">📊</div>
           <div>
-            <p className="text-xs font-semibold">Nouveau message</p>
-            <p className="text-[10px] text-muted-foreground">Mme Diop · Maths</p>
+            <p className="text-xs font-bold text-foreground">Présence aujourd'hui</p>
+            <p className="text-base font-display font-bold text-flora-success leading-none">98.4%</p>
           </div>
         </div>
       </div>
 
-      <div className="absolute -bottom-2 -right-2 bg-card rounded-2xl shadow-flora-lg border border-border p-3 animate-float max-w-[180px]" style={{ animationDelay: "2s" }}>
+      <div className="absolute -bottom-4 -left-3 md:-left-8 bg-card/95 backdrop-blur-md rounded-2xl shadow-flora-lg border border-border p-3 animate-float max-w-[210px]" style={{ animationDelay: "2s" }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-accent/15 text-accent flex items-center justify-center">
-            <Bell className="w-4 h-4" />
-          </div>
+          <div className="w-9 h-9 rounded-lg bg-accent/15 text-accent flex items-center justify-center text-lg">🎓</div>
           <div>
-            <p className="text-xs font-semibold">Bulletin disponible</p>
-            <p className="text-[10px] text-muted-foreground">Trimestre 2 · CM2</p>
+            <p className="text-xs font-bold text-foreground">Bulletin Trim. 2</p>
+            <p className="text-[10px] text-muted-foreground">CM2 · Moy. classe 14.2/20</p>
           </div>
         </div>
       </div>
 
-      <div className="absolute top-1/2 -right-6 bg-card rounded-2xl shadow-flora-lg border border-border p-3 animate-float" style={{ animationDelay: "1s" }}>
+      <div className="hidden md:block absolute top-1/2 -right-10 -translate-y-1/2 bg-card/95 backdrop-blur-md rounded-2xl shadow-flora-lg border border-border p-3 animate-float" style={{ animationDelay: "1s" }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-            <Users className="w-4 h-4" />
-          </div>
+          <div className="w-9 h-9 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center text-lg">💬</div>
           <div>
-            <p className="text-xs font-semibold">+24 élèves</p>
-            <p className="text-[10px] text-muted-foreground">Cette semaine</p>
+            <p className="text-xs font-bold text-foreground">+12 messages</p>
+            <p className="text-[10px] text-muted-foreground">Parents · Aujourd'hui</p>
           </div>
         </div>
       </div>

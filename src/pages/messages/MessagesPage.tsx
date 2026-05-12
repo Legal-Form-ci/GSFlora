@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSchool } from '@/contexts/SchoolContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,6 +78,7 @@ interface UserOption {
 
 const MessagesPage = () => {
   const { user, profile, role } = useAuth();
+  const { currentSchool } = useSchool();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -90,7 +92,7 @@ const MessagesPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && currentSchool) {
       fetchConversations();
       fetchUsers();
       
@@ -119,7 +121,7 @@ const MessagesPage = () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [user, selectedConversation]);
+  }, [user, currentSchool, selectedConversation]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -132,6 +134,7 @@ const MessagesPage = () => {
   };
 
   const fetchConversations = async () => {
+    if (!currentSchool) return;
     try {
       const { data: participations } = await supabase
         .from('conversation_participants')
@@ -150,6 +153,7 @@ const MessagesPage = () => {
         .from('conversations')
         .select('*')
         .in('id', conversationIds)
+        .eq('school_id', currentSchool.id)
         .order('updated_at', { ascending: false });
 
       // Fetch participants for each conversation
@@ -242,26 +246,33 @@ const MessagesPage = () => {
   };
 
   const fetchUsers = async () => {
+    if (!currentSchool) return;
     try {
+      // Only users that belong to the current school
+      const { data: members } = await supabase
+        .from('school_members')
+        .select('user_id, role')
+        .eq('school_id', currentSchool.id)
+        .eq('is_active', true);
+
+      const memberIds = (members || [])
+        .map((m) => m.user_id)
+        .filter((id) => id !== user?.id);
+
+      if (memberIds.length === 0) {
+        setUsers([]);
+        return;
+      }
+
+      const roleByUser = new Map((members || []).map((m) => [m.user_id, m.role]));
+
       const { data } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, email')
-        .neq('id', user?.id)
+        .in('id', memberIds)
         .order('last_name');
 
-      // Get roles for each user
-      const usersWithRoles = await Promise.all(
-        (data || []).map(async (u) => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', u.id)
-            .single();
-          return { ...u, role: roleData?.role };
-        })
-      );
-
-      setUsers(usersWithRoles);
+      setUsers((data || []).map((u) => ({ ...u, role: roleByUser.get(u.id) })));
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -292,6 +303,10 @@ const MessagesPage = () => {
       toast.error('Sélectionnez au moins un destinataire');
       return;
     }
+    if (!currentSchool) {
+      toast.error('Aucun établissement sélectionné');
+      return;
+    }
 
     try {
       // Create conversation
@@ -300,6 +315,7 @@ const MessagesPage = () => {
         .insert({
           type: selectedUsers.length > 1 ? 'group' : 'direct',
           title: selectedUsers.length > 1 ? 'Groupe' : null,
+          school_id: currentSchool.id,
         })
         .select()
         .single();
