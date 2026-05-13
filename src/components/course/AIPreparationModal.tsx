@@ -59,7 +59,7 @@ const AIPreparationModal = ({
   subjects,
   classes,
   teacherName,
-  schoolName = 'Groupe Scolaire Flora',
+  schoolName = 'SchoolHub Pro',
 }: AIPreparationModalProps) => {
   const { generate, isGenerating, generatedContent, reset } = useAIGenerator();
   const [showFullContent, setShowFullContent] = useState(false);

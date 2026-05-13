@@ -494,7 +494,7 @@ export const UserGuide = ({ role, onClose }: UserGuideProps) => {
                 <Badge variant="secondary">{roleLabels[role]}</Badge>
               </CardTitle>
               <CardDescription>
-                Tout ce que vous devez savoir pour utiliser GS Flora Digital
+                Tout ce que vous devez savoir pour utiliser SchoolHub Pro
               </CardDescription>
             </div>
           </div>
