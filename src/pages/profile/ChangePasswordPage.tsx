@@ -17,7 +17,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import logoFlora from '@/assets/logo-flora.jpeg';
+import Logo from '@/components/Logo';
 
 const ChangePasswordPage = () => {
   const { user, role } = useAuth();
@@ -122,8 +122,8 @@ const ChangePasswordPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto">
-            <img src={logoFlora} alt="Flora Campus" className="w-20 h-20 rounded-full shadow-lg" />
+          <div className="mx-auto bg-white rounded-2xl p-3 shadow-lg inline-block">
+            <Logo className="h-12" />
           </div>
           <div>
             <CardTitle className="text-2xl flex items-center justify-center gap-2">

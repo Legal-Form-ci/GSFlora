@@ -113,7 +113,7 @@ const HeroSection = () => {
           <div className="flex gap-12 animate-marquee whitespace-nowrap">
             {[...Array(2)].map((_, k) => (
               <div key={k} className="flex gap-12 shrink-0 items-center">
-                {["GS Flora", "Académie Digitale", "Concordia School", "Lycée Lumière", "Saint-Joseph", "EduPro Institut", "Cours Florent", "La Croix Blanche"].map((n) => (
+                {["Académie Digitale", "Concordia School", "Lycée Lumière", "Saint-Joseph", "EduPro Institut", "Cours Florent", "La Croix Blanche", "Horizon Campus"].map((n) => (
                   <span key={n + k} className="text-2xl font-display font-bold text-muted-foreground/40 hover:text-primary transition-colors">
                     {n}
                   </span>
