@@ -1,15 +1,22 @@
 import { useRef, useState, useEffect } from "react";
-import { Play, Pause, Volume2, VolumeX, Sparkles } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Sparkles, Zap, ZapOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DashboardVideoSection = () => {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const stored = localStorage.getItem("reduce-motion");
+    if (stored !== null) return stored === "1";
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  });
 
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    if (reducedMotion) { v.pause(); setPlaying(false); return; }
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) v.play().catch(() => {});
@@ -19,7 +26,7 @@ const DashboardVideoSection = () => {
     );
     obs.observe(v);
     return () => obs.disconnect();
-  }, []);
+  }, [reducedMotion]);
 
   const toggle = () => {
     const v = ref.current; if (!v) return;
@@ -28,6 +35,13 @@ const DashboardVideoSection = () => {
   const toggleMute = () => {
     const v = ref.current; if (!v) return;
     v.muted = !v.muted; setMuted(v.muted);
+  };
+  const toggleReducedMotion = () => {
+    setReducedMotion((r) => {
+      const next = !r;
+      try { localStorage.setItem("reduce-motion", next ? "1" : "0"); } catch {}
+      return next;
+    });
   };
 
   return (
@@ -61,21 +75,40 @@ const DashboardVideoSection = () => {
               <span className="w-3 h-3 rounded-full bg-green-500/80" />
               <span className="ml-3 text-xs text-sidebar-foreground/60">app.schoolhub.pro / dashboard</span>
             </div>
-            <video
-              ref={ref}
-              src="/dashboard-video.mp4"
-              poster="/logo-schoolhub-pro.png"
-              className="w-full aspect-video object-cover bg-black"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
+            {reducedMotion ? (
+              <img
+                src="/dashboard-video-poster.jpg"
+                alt="Aperçu du tableau de bord SchoolHub Pro"
+                className="w-full aspect-video object-cover bg-black"
+                loading="lazy"
+              />
+            ) : (
+              <video
+                ref={ref}
+                src="/dashboard-video.mp4"
+                poster="/dashboard-video-poster.jpg"
+                className="w-full aspect-video object-cover bg-black"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+              />
+            )}
             <div className="absolute bottom-4 right-4 flex gap-2">
-              <Button size="icon" variant="secondary" onClick={toggle} aria-label="Lecture">
+              <Button
+                size="icon"
+                variant="secondary"
+                onClick={toggleReducedMotion}
+                aria-label={reducedMotion ? "Réactiver les animations" : "Réduire les animations"}
+                title={reducedMotion ? "Réactiver les animations" : "Réduire les animations"}
+              >
+                {reducedMotion ? <Zap className="w-4 h-4" /> : <ZapOff className="w-4 h-4" />}
+              </Button>
+              <Button size="icon" variant="secondary" onClick={toggle} aria-label="Lecture" disabled={reducedMotion}>
                 {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </Button>
-              <Button size="icon" variant="secondary" onClick={toggleMute} aria-label="Son">
+              <Button size="icon" variant="secondary" onClick={toggleMute} aria-label="Son" disabled={reducedMotion}>
                 {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
             </div>
