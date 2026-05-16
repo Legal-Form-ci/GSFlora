@@ -5,8 +5,8 @@ import { Link } from "react-router-dom";
 const roles = [
   {
     icon: Building2,
-    role: "Administration",
-    title: "Pilotez sans effort",
+    role: "Fondateur",
+    title: "Pilotez votre établissement sans effort",
     desc: "Inscriptions, paiements, scolarité, finances et reporting consolidés.",
     cta: "Démarrer mon établissement",
     href: "/auth?mode=signup",
