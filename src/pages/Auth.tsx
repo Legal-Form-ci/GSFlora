@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { Building2, Mail, Lock, User, Phone, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import Logo from "@/components/Logo";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -109,12 +110,12 @@ const Auth = () => {
         </Link>
 
         <div className="bg-card rounded-3xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-800 to-slate-700 p-8 text-center">
-            <div className="w-16 h-16 bg-accent rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <Building2 className="w-8 h-8 text-accent-foreground" />
+          <div className="bg-gradient-to-br from-primary via-primary to-primary/80 p-8 text-center">
+            <div className="mx-auto mb-4 flex items-center justify-center">
+              <Logo className="h-16 w-auto" invert />
             </div>
-            <h1 className="font-display text-2xl font-bold text-white">SchoolHub Pro</h1>
-            <p className="text-white/70 text-sm mt-1">
+            <h1 className="font-display text-2xl font-bold text-primary-foreground">SchoolHub Pro</h1>
+            <p className="text-primary-foreground/70 text-sm mt-1">
               {mode === 'login' && "Connectez-vous à votre compte"}
               {mode === 'signup' && "Créez votre compte"}
               {mode === 'forgot' && "Récupération de mot de passe"}
