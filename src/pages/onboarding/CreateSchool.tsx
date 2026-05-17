@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Building2, ArrowLeft, Loader2, CheckCircle2, Globe, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import Logo from '@/components/Logo';
 
 const CreateSchool = () => {
   const { user } = useAuth();

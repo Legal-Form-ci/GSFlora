@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+# Lovable QA branding hook — installs via `npx husky install` or copy to .git/hooks/pre-commit
+node scripts/qa-branding.mjs || {
+  echo ""
+  echo "❌ Commit bloqué : la checklist de branding a échoué."
+  echo "   Corrigez les références à l'ancien logo / branding avant de committer."
+  exit 1
+}
