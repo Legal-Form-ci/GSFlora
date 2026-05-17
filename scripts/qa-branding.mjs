@@ -7,7 +7,7 @@ const ROOTS = ["src", "public", "scripts"];
 const ROOT_SHALLOW = ["."];
 const EXTS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".html", ".json", ".webmanifest", ".yml", ".yaml"]);
 const SKIP_DIRS = new Set(["node_modules", "dist", ".git", ".next", "build", "coverage"]);
-const SKIP_FILES = new Set(["package-lock.json", "bun.lockb", "pnpm-lock.yaml", "yarn.lock"]);
+const SKIP_FILES = new Set(["qa-branding.mjs", "package-lock.json", "bun.lockb", "pnpm-lock.yaml", "yarn.lock"]);
 
 const FORBIDDEN = [
   { re: /logo-flora\.png/i, msg: "Ancien logo /logo-flora.png" },
@@ -47,6 +47,7 @@ function walk(dir) {
 
 console.log("== QA Branding Checklist ==");
 for (const r of ROOTS) walk(r);
+// self-exclude the QA script itself (it intentionally contains the forbidden patterns)
 for (const r of ROOT_SHALLOW) {
   if (!existsSync(r)) continue;
   for (const name of readdirSync(r)) {

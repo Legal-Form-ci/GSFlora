@@ -159,7 +159,7 @@ const CreateSchool = () => {
                   <span className="text-sm text-muted-foreground whitespace-nowrap">schoolhubpro.com/</span>
                   <Input
                     id="slug"
-                    placeholder="gs-flora"
+                    placeholder="mon-etablissement"
                     value={form.slug}
                     onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
                   />
