@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Building2, ArrowLeft, Loader2, CheckCircle2, Globe, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import Logo from '@/components/Logo';
 
 const CreateSchool = () => {
   const { user } = useAuth();
@@ -158,7 +159,7 @@ const CreateSchool = () => {
                   <span className="text-sm text-muted-foreground whitespace-nowrap">schoolhubpro.com/</span>
                   <Input
                     id="slug"
-                    placeholder="gs-flora"
+                    placeholder="mon-etablissement"
                     value={form.slug}
                     onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
                   />
