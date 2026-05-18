@@ -4,6 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global "reduce motion" override — driven by MotionPreferenceContext.
+   When the user enables it (Settings > Accessibilité) we add the
+   `reduce-motion` class on <html> and neutralize all animations. */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* SchoolHub Pro Design System
    New brand identity: Forest Green, Sky Blue, Warm Gold
    Inspired by the open book + lightning bolt logo

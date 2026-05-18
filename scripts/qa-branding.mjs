@@ -22,6 +22,9 @@ const REQUIRED = [
   { file: "src/components/Logo.tsx", needles: ["logo-schoolhub-pro"], label: "Logo central" },
   { file: "index.html", needles: ["SchoolHub Pro", "logo-schoolhub-pro.png"], label: "index.html branding & favicon" },
   { file: "public/manifest.json", needles: ["SchoolHub Pro", "logo-schoolhub-pro.png"], label: "PWA manifest branding" },
+  { file: "src/lib/brandingGuard.ts", needles: ["startBrandingGuard"], label: "Runtime branding guard" },
+  { file: "src/contexts/MotionPreferenceContext.tsx", needles: ["MotionPreferenceProvider", "reduce-motion"], label: "Motion preference context" },
+  { file: "src/main.tsx", needles: ["startBrandingGuard"], label: "Branding guard wired in main" },
 ];
 
 const FORBIDDEN_FILES = ["public/logo-flora.png", "src/assets/logo-flora.png"];

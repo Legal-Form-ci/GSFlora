@@ -29,8 +29,10 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
+  Accessibility,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMotionPreference } from '@/contexts/MotionPreferenceContext';
 
 const navItems = [
   { label: 'Retour', href: '/', icon: <Home className="w-5 h-5" /> },
@@ -48,6 +50,7 @@ const SettingsPage = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'general';
+  const { reducedMotion, set: setReducedMotion } = useMotionPreference();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -264,6 +267,35 @@ const SettingsPage = () => {
                       <SelectItem value="en">English</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Accessibility className="w-5 h-5" />
+                  Accessibilité
+                </CardTitle>
+                <CardDescription>
+                  Réduisez les animations pour économiser de la bande passante
+                  ou améliorer le confort visuel.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="reduce-motion">Réduire les animations</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Désactive l'auto-lecture de la vidéo dashboard et neutralise
+                      les transitions globales.
+                    </p>
+                  </div>
+                  <Switch
+                    id="reduce-motion"
+                    checked={reducedMotion}
+                    onCheckedChange={(v) => setReducedMotion(!!v)}
+                  />
                 </div>
               </CardContent>
             </Card>

@@ -1,17 +1,13 @@
 import { useRef, useState, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Sparkles, Zap, ZapOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMotionPreference } from "@/contexts/MotionPreferenceContext";
 
 const DashboardVideoSection = () => {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
-  const [reducedMotion, setReducedMotion] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const stored = localStorage.getItem("reduce-motion");
-    if (stored !== null) return stored === "1";
-    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-  });
+  const { reducedMotion, toggle: toggleReducedMotion } = useMotionPreference();
 
   useEffect(() => {
     const v = ref.current;
@@ -35,13 +31,6 @@ const DashboardVideoSection = () => {
   const toggleMute = () => {
     const v = ref.current; if (!v) return;
     v.muted = !v.muted; setMuted(v.muted);
-  };
-  const toggleReducedMotion = () => {
-    setReducedMotion((r) => {
-      const next = !r;
-      try { localStorage.setItem("reduce-motion", next ? "1" : "0"); } catch {}
-      return next;
-    });
   };
 
   return (
