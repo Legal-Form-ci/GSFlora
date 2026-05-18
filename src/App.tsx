@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { SchoolProvider, useSchool } from "./contexts/SchoolContext";
 import { MotionPreferenceProvider } from "./contexts/MotionPreferenceContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ConnectionIndicator from "./components/debug/ConnectionIndicator";
 import SchoolSlugLayout from "./components/SchoolSlugLayout";
 
 // Pages
@@ -271,6 +272,7 @@ const App = () => (
           <SchoolProvider>
             <MotionPreferenceProvider>
               <AppRoutes />
+              <ConnectionIndicator />
             </MotionPreferenceProvider>
           </SchoolProvider>
         </AuthProvider>
