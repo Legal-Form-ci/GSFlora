@@ -271,6 +271,35 @@ const SettingsPage = () => {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Accessibility className="w-5 h-5" />
+                  Accessibilité
+                </CardTitle>
+                <CardDescription>
+                  Réduisez les animations pour économiser de la bande passante
+                  ou améliorer le confort visuel.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="reduce-motion">Réduire les animations</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Désactive l'auto-lecture de la vidéo dashboard et neutralise
+                      les transitions globales.
+                    </p>
+                  </div>
+                  <Switch
+                    id="reduce-motion"
+                    checked={reducedMotion}
+                    onCheckedChange={(v) => setReducedMotion(!!v)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end">
               <Button onClick={handleSaveSettings} disabled={saving}>
                 {saving ? (
