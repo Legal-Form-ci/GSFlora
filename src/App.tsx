@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { SchoolProvider, useSchool } from "./contexts/SchoolContext";
+import { MotionPreferenceProvider } from "./contexts/MotionPreferenceContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SchoolSlugLayout from "./components/SchoolSlugLayout";
 
@@ -268,7 +269,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <SchoolProvider>
-            <AppRoutes />
+            <MotionPreferenceProvider>
+              <AppRoutes />
+            </MotionPreferenceProvider>
           </SchoolProvider>
         </AuthProvider>
       </BrowserRouter>
