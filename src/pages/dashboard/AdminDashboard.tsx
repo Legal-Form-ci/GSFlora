@@ -112,8 +112,8 @@ const AdminDashboard = () => {
           <StatCard title="Élèves" value={stats.totalStudents} icon={<GraduationCap className="w-6 h-6" />} iconClassName="bg-flora-coral/20 text-flora-coral-dark" />
           <StatCard title="Enseignants" value={stats.totalTeachers} icon={<Users className="w-6 h-6" />} iconClassName="bg-flora-success/20 text-flora-success" />
           <StatCard title="Classes" value={stats.totalClasses} icon={<GraduationCap className="w-6 h-6" />} iconClassName="bg-flora-gold/20 text-amber-600" />
-          <StatCard title="Cours" value={stats.totalCourses} icon={<BookOpen className="w-6 h-6" />} iconClassName="bg-blue-500/20 text-blue-600" />
-          <StatCard title="Matières" value={stats.totalSubjects} icon={<BookOpen className="w-6 h-6" />} iconClassName="bg-purple-500/20 text-purple-600" />
+          <StatCard title="Cours" value={stats.totalCourses} icon={<BookOpen className="w-6 h-6" />} iconClassName="bg-secondary/15 text-secondary" />
+          <StatCard title="Matières" value={stats.totalSubjects} icon={<BookOpen className="w-6 h-6" />} iconClassName="bg-accent/20 text-accent-foreground" />
         </div>
 
         <div className="flex flex-wrap gap-3">
