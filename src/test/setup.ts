@@ -13,3 +13,13 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+// jsdom does not ship IntersectionObserver — provide a noop polyfill so
+// components using viewport-aware behaviors can render in tests.
+class IO {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() { return []; }
+}
+(globalThis as any).IntersectionObserver = (globalThis as any).IntersectionObserver || IO;
