@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Building2, ArrowLeft, Loader2, CheckCircle2, Globe, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2, Globe, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import Logo from '@/components/Logo';
@@ -134,8 +134,8 @@ const CreateSchool = () => {
         {step === 1 && (
           <Card className="animate-slide-up">
             <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Building2 className="w-8 h-8 text-primary" />
+              <div className="flex items-center justify-center mx-auto mb-4">
+                <Logo className="h-14 w-auto" />
               </div>
               <CardTitle className="text-2xl">Créer votre établissement</CardTitle>
               <CardDescription>
