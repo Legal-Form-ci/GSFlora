@@ -29,8 +29,10 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
+  Accessibility,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMotionPreference } from '@/contexts/MotionPreferenceContext';
 
 const navItems = [
   { label: 'Retour', href: '/', icon: <Home className="w-5 h-5" /> },
@@ -48,6 +50,7 @@ const SettingsPage = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'general';
+  const { reducedMotion, set: setReducedMotion } = useMotionPreference();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
