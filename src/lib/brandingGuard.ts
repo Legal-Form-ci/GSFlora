@@ -44,11 +44,12 @@ const sweep = (root: Node) => {
 };
 
 export function startBrandingGuard(): void {
-  if (started || typeof document === "undefined") return;
-  started = true;
+  if (typeof document === "undefined") return;
 
   const run = () => {
-    sweep(document.body);
+    if (document.body) sweep(document.body);
+    if (started) return;
+    started = true;
     const obs = new MutationObserver((mutations) => {
       for (const m of mutations) {
         m.addedNodes.forEach(sweep);
